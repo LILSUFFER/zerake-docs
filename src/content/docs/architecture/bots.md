@@ -11,21 +11,6 @@ description: Три бота и что делает каждый.
 
 ## Как ходит сообщение в поддержку
 
-```mermaid
-sequenceDiagram
-  participant P as Игрок
-  participant SB as Бот поддержки
-  participant S as Сервер
-  participant TB as Бот команды
-  participant M as Менеджер
-  P->>SB: Вопрос / скриншот
-  SB->>S: Кто это (ClubGG ID)
-  S->>TB: Сообщение всем из команды
-  TB-->>M: 💬 Поддержка · @игрок · ID
-  M->>TB: Ответить (Reply)
-  TB->>S: Чей это вопрос
-  S->>SB: Ответ игроку
-  SB-->>P: Ответ команды
-```
+![Как ходит сообщение в поддержку](/diagrams/support.svg)
 
 Бот команды отвечает только людям из списка команды. Боты проверяют, что запросы пришли именно от Telegram.

@@ -19,21 +19,44 @@ description: Проверка блокчейнов, подтверждения �
 7. Перевод записывается по паре **«сеть + хэш перевода»**. Эта пара уникальна в базе — один перевод **нельзя зачислить дважды**, даже если проверка увидит его снова.
 8. Переводы **между адресами клуба** (объединение средств, газ) пополнениями не считаются.
 
-```mermaid
-flowchart TB
-  A["Новый подтверждённый перевод<br/>на адрес клуба"] --> B{"Перевод между<br/>адресами клуба?"}
-  B -- да --> X["Пропустить"]
-  B -- нет --> C{"Уже записан<br/>(сеть + хэш)?"}
-  C -- да --> X
-  C -- нет --> D{"Какая сеть?"}
-  D -- "TRC20 / BEP20" --> E{"Есть заявка с этим<br/>адресом и точной суммой?"}
-  E -- да --> F["DEP-… «Получено»"]
-  E -- нет --> U["«Неопознанный платёж»<br/>→ команда разбирает вручную"]
-  D -- "TON / GRAM" --> G{"Чей это личный адрес?"}
-  G --> H{"Сумма ≥ минимума?"}
-  H -- да --> F
-  H -- нет --> M["DEP-… «Меньше минимума»"]
-  F --> Q["Очередь выдачи фишек"]
+```d2 title="Как сервер разбирает каждый перевод"
+classes: {
+  zk: {style: {fill: "#e7f8f0"; stroke: "#12a477"; font-color: "#0b3d2c"; border-radius: 10; stroke-width: 2}}
+  you: {style: {fill: "#f4f4f5"; stroke: "#a1a1aa"; font-color: "#1d1d1f"; border-radius: 10; stroke-width: 2}}
+  chain: {style: {fill: "#eaf1fd"; stroke: "#4c7be0"; font-color: "#1b3a78"; border-radius: 10; stroke-width: 2}}
+  team: {style: {fill: "#f3efff"; stroke: "#7c5cd6"; font-color: "#3a2a73"; border-radius: 10; stroke-width: 2}}
+  ask: {style: {fill: "#fff8e6"; stroke: "#d6a019"; font-color: "#5c4300"; border-radius: 10; stroke-width: 2}}
+  ok: {style: {fill: "#12a477"; stroke: "#0f8a63"; font-color: "#ffffff"; border-radius: 10; stroke-width: 2; bold: true}}
+  bad: {style: {fill: "#fdeeee"; stroke: "#d64545"; font-color: "#7a1f1f"; border-radius: 10; stroke-width: 2}}
+  muted: {style: {fill: "#fafafa"; stroke: "#d4d4d8"; font-color: "#6b6b72"; border-radius: 10; stroke-dash: 3}}
+  box: {style: {fill: "#fbfbfb"; stroke: "#d4d4d8"; border-radius: 14; font-color: "#6b6b72"; stroke-dash: 3}}
+}
+(** -> **)[*].style: {stroke: "#8a8f96"; stroke-width: 2; font-color: "#3c3c40"; font-size: 14; italic: false}
+
+direction: down
+a: "Новый подтверждённый перевод\nна адрес клуба" {class: chain}
+b: "Перевод между\nадресами клуба?" {class: ask}
+c: "Уже записан\n(сеть + хэш)?" {class: ask}
+skip: Пропустить {class: muted}
+net: Какая сеть? {class: ask}
+e: "Есть заявка с этим адресом\nи точной суммой?" {class: ask}
+g: "За кем закреплён адрес?\nСумма ≥ минимума?" {class: ask}
+u: "Неопознанный платёж\n→ команда разбирает" {class: bad}
+m: "DEP-… «Меньше минимума»" {class: bad}
+f: "DEP-… «Получено»" {class: ok}
+q: Очередь выдачи фишек {class: zk}
+a -> b
+b -> skip: да
+b -> c: нет
+c -> skip: да
+c -> net: нет
+net -> e: TRC20 / BEP20
+net -> g: TON / GRAM
+e -> f: да
+e -> u: нет
+g -> f: да
+g -> m: нет
+f -> q
 ```
 
 ## Сколько ждать

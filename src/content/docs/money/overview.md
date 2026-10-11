@@ -7,26 +7,41 @@ description: Куда идут деньги при пополнении и от�
 
 ## Карта
 
-```mermaid
-flowchart TB
-  P["Ваш кошелёк<br/>или биржа"]
-  subgraph IN["Пополнение"]
-    A1["Адрес клуба<br/>(TRC20 / BEP20)"]
-    A2["Ваш личный адрес<br/>(TON / GRAM)"]
-  end
-  S["Сервер Zerake<br/>находит платёж"]
-  G["Фишки на вашем<br/>ID в ClubGG"]
-  subgraph OUT["Снятие"]
-    W["Проверка средств клуба<br/>и выплата"]
-  end
-  B["Ваш привязанный<br/>кошелёк"]
-  P -- "USDT TRC20 / BEP20" --> A1
-  P -- "USDT TON / GRAM" --> A2
-  A1 --> S
-  A2 --> S
-  S -- "1 USDT = 1 фишка" --> G
-  G -- "заявка на снятие" --> W
-  W -- "USDT / GRAM" --> B
+```d2 title="Карта движения средств"
+classes: {
+  zk: {style: {fill: "#e7f8f0"; stroke: "#12a477"; font-color: "#0b3d2c"; border-radius: 10; stroke-width: 2}}
+  you: {style: {fill: "#f4f4f5"; stroke: "#a1a1aa"; font-color: "#1d1d1f"; border-radius: 10; stroke-width: 2}}
+  chain: {style: {fill: "#eaf1fd"; stroke: "#4c7be0"; font-color: "#1b3a78"; border-radius: 10; stroke-width: 2}}
+  team: {style: {fill: "#f3efff"; stroke: "#7c5cd6"; font-color: "#3a2a73"; border-radius: 10; stroke-width: 2}}
+  ask: {style: {fill: "#fff8e6"; stroke: "#d6a019"; font-color: "#5c4300"; border-radius: 10; stroke-width: 2}}
+  ok: {style: {fill: "#12a477"; stroke: "#0f8a63"; font-color: "#ffffff"; border-radius: 10; stroke-width: 2; bold: true}}
+  bad: {style: {fill: "#fdeeee"; stroke: "#d64545"; font-color: "#7a1f1f"; border-radius: 10; stroke-width: 2}}
+  muted: {style: {fill: "#fafafa"; stroke: "#d4d4d8"; font-color: "#6b6b72"; border-radius: 10; stroke-dash: 3}}
+  box: {style: {fill: "#fbfbfb"; stroke: "#d4d4d8"; border-radius: 14; font-color: "#6b6b72"; stroke-dash: 3}}
+}
+(** -> **)[*].style: {stroke: "#8a8f96"; stroke-width: 2; font-color: "#3c3c40"; font-size: 14; italic: false}
+
+direction: down
+p: "Ваш кошелёк\nили биржа" {class: you}
+in: Пополнение {
+  class: box
+  a1: "Общий адрес клуба\nTRC20 / BEP20" {class: chain}
+  a2: "Персональный адрес клуба\nTON / GRAM" {class: chain}
+}
+s: "Zerake\nнаходит платёж" {class: zk}
+g: "Фишки на вашем\nID в ClubGG" {class: ok}
+out: Снятие {
+  class: box
+  w: "Проверка средств\nклуба и выплата" {class: zk}
+}
+b: "Ваш привязанный\nкошелёк" {class: you}
+p -> in.a1: "1 · USDT"
+p -> in.a2: "1 · USDT / GRAM"
+in.a1 -> s: 2
+in.a2 -> s: 2
+s -> g: "3 · 1 USDT = 1 фишка"
+g -> out.w: "4 · заявка на снятие"
+out.w -> b: "5 · USDT / GRAM"
 ```
 
 ## Главное в десяти пунктах
@@ -34,7 +49,7 @@ flowchart TB
 1. **1 фишка = 1 USDT.** GRAM пересчитывается по курсу.
 2. Пополнять можно в **четырёх вариантах**: USDT в сетях TRC20, BEP20 и TON, монета GRAM.
 3. В **TRC20 и BEP20** пополнение идёт по **заявке**: точная сумма и адрес, 30 минут. [Подробнее](/money/deposit-request/)
-4. В **TON и GRAM** у вас **личный адрес**: любая сумма, без срока и комментария. [Подробнее](/money/deposit-personal/)
+4. В **TON и GRAM** за вами закреплён **персональный адрес клуба**: любая сумма, без срока и комментария. [Подробнее](/money/deposit-personal/)
 5. Пополнять можно **с любого кошелька**, в том числе с биржи.
 6. Сервер проверяет все адреса **раз в минуту** и сам сопоставляет платёж с вами. [Подробнее](/money/detection/)
 7. Снятие уходит **только на привязанный кошелёк** этой сети.
@@ -47,7 +62,7 @@ flowchart TB
 | | TRC20 | BEP20 | TON (USDT) | GRAM |
 |---|---|---|---|---|
 | Блокчейн | Tron | BNB Chain | TON | TON |
-| Способ пополнения | заявка | заявка | личный адрес | личный адрес |
+| Способ пополнения | заявка на общий адрес | заявка на общий адрес | персональный адрес | персональный адрес |
 | Мин. пополнение | 10 USDT | 10 USDT | 1 USDT | $1 в GRAM |
 | Мин. снятие | 10 | 10 | 10 | 5 |
 | Комиссия снятия | 3 USDT + 1% | 0 | 0 | 0 |

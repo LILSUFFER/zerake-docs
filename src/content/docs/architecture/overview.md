@@ -5,46 +5,56 @@ description: Из каких частей состоит Zerake и как они
 
 ## Компоненты
 
-```mermaid
-flowchart TB
-  subgraph Telegram
-    PB[Бот игроков<br/>@zerakebot]
-    SB[Бот поддержки]
-    TB[Бот команды]
-    MA[Мини-приложение<br/>zerake.com/app]
-  end
-  subgraph Web
-    ADM[Админка<br/>zerake.com/admin]
-    DOC[Документация<br/>docs.zerake.com]
-  end
-  subgraph Server[Сервер Zerake]
-    AUTH[Вход через Telegram]
-    API[Серверные функции]
-    DB[(База данных<br/>с правилами доступа)]
-    CRON[Планировщик<br/>каждую минуту]
-    LOG[(Журнал операций<br/>только дописывание)]
-  end
-  subgraph Chains[Блокчейны]
-    TRON[Tron]
-    BSC[BNB Chain]
-    TON[TON]
-  end
-  subgraph ClubGG
-    CNT[Прилавок клуба<br/>выдача и снятие фишек]
-  end
-  AG[Агент выдачи фишек]
-
-  PB --> MA
-  MA --> AUTH --> API
-  ADM --> API
-  API <--> DB
-  DB --> LOG
-  CRON --> API
-  API <--> TRON & BSC & TON
-  API --> PB & SB & TB
-  AG <--> API
-  AG --> CNT
+```d2 title="Компоненты Zerake"
+classes: {
+  zk: {style: {fill: "#e7f8f0"; stroke: "#12a477"; font-color: "#0b3d2c"; border-radius: 10; stroke-width: 2}}
+  you: {style: {fill: "#f4f4f5"; stroke: "#a1a1aa"; font-color: "#1d1d1f"; border-radius: 10; stroke-width: 2}}
+  chain: {style: {fill: "#eaf1fd"; stroke: "#4c7be0"; font-color: "#1b3a78"; border-radius: 10; stroke-width: 2}}
+  team: {style: {fill: "#f3efff"; stroke: "#7c5cd6"; font-color: "#3a2a73"; border-radius: 10; stroke-width: 2}}
+  ask: {style: {fill: "#fff8e6"; stroke: "#d6a019"; font-color: "#5c4300"; border-radius: 10; stroke-width: 2}}
+  ok: {style: {fill: "#12a477"; stroke: "#0f8a63"; font-color: "#ffffff"; border-radius: 10; stroke-width: 2; bold: true}}
+  bad: {style: {fill: "#fdeeee"; stroke: "#d64545"; font-color: "#7a1f1f"; border-radius: 10; stroke-width: 2}}
+  muted: {style: {fill: "#fafafa"; stroke: "#d4d4d8"; font-color: "#6b6b72"; border-radius: 10; stroke-dash: 3}}
+  box: {style: {fill: "#fbfbfb"; stroke: "#d4d4d8"; border-radius: 14; font-color: "#6b6b72"; stroke-dash: 3}}
+}
+(** -> **)[*].style: {stroke: "#8a8f96"; stroke-width: 2; font-color: "#3c3c40"; font-size: 14; italic: false}
+direction: down
+people: Люди {
+  class: box
+  p: "Игрок\nмини-приложение" {class: you}
+  m: "Команда\nадминка" {class: team}
+}
+srv: Сервер Zerake {
+  class: box
+  cron: "Планировщик\nраз в минуту" {class: zk}
+  api: Серверные функции {class: zk}
+  db: "База данных\nс правилами доступа" {class: zk; shape: cylinder}
+  log: "Журнал операций\nтолько дописывание" {class: zk; shape: cylinder}
+  cron -> api: 3
+  api -> db: 4
+  db -> log: 5
+}
+ext: Внешние системы {
+  class: box
+  chains: "Блокчейны\nTron · BNB Chain · TON" {class: chain}
+  bots: "Боты Telegram\nигроки · поддержка · команда" {class: chain}
+  ag: "Агент → ClubGG\nвыдача фишек" {class: chain}
+}
+people.p -> srv.api: 1
+people.m -> srv.api: 2
+srv.api -> ext.chains: 6
+srv.api -> ext.bots: 7
+srv.api -> ext.ag: 8
 ```
+
+1. **Игрок** работает через мини-приложение в Telegram: пополнение, снятие, настройки.
+2. **Команда** работает через админку: очередь, операции, поддержка.
+3. **Планировщик** раз в минуту запускает поиск новых платежей во всех сетях.
+4. **Серверные функции** читают и меняют данные; игрок видит только свои строки.
+5. Каждое изменение пополнения или снятия **база сама пишет в журнал**, который нельзя изменить.
+6. Сервер **читает блокчейны** (поиск платежей) и **отправляет выплаты**.
+7. Сервер **шлёт уведомления** через трёх ботов: игрокам, в поддержку и команде.
+8. **Агент** получает оплаченные пополнения и выдаёт фишки в ClubGG.
 
 | Компонент | Задача |
 |---|---|

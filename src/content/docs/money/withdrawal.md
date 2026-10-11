@@ -32,33 +32,34 @@ description: Пошагово, от заявки до денег на кошел
 6. Сервер выбирает, **с каких адресов платить** ([подробно](/money/payout-sources/)), и отправляет перевод **на ваш привязанный кошелёк**.
 7. Дожидается подтверждения в сети → «Выплачено», ссылка на перевод.
 
-```mermaid
-sequenceDiagram
-  autonumber
-  actor P as Игрок
-  participant Z as Zerake
-  actor M as Менеджер
-  participant C as Блокчейн
-  P->>Z: Снять N фишек + PIN
-  Z->>Z: Проверки + хватает ли средств
-  Z-->>M: Новая заявка WD-…
-  M->>M: Снимает N фишек в ClubGG
-  M->>Z: «Фишки сняты: N»
-  Z->>Z: Сумма совпала? Средств хватает?
-  Z->>C: Перевод на привязанный кошелёк
-  C-->>Z: Подтверждён
-  Z-->>P: «Вывод выполнен» + ссылка
-```
+![Снятие фишек](/diagrams/withdrawal.svg)
 
 ## Проверка средств клуба
 
-```mermaid
-flowchart TB
-  A["Сумма на всех адресах клуба в этой сети"] --> B["минус комиссии сети<br/>за каждый перевод"]
-  B --> C["минус все снятия, которые уже созданы,<br/>но ещё не выплачены"]
-  C --> D{"Свободно ≥ эта выплата?"}
-  D -- да --> OK["Заявку можно принять / фишки можно снять"]
-  D -- нет --> NO["Отказ: выберите другую сеть или меньшую сумму"]
+```d2 title="Проверка средств клуба"
+classes: {
+  zk: {style: {fill: "#e7f8f0"; stroke: "#12a477"; font-color: "#0b3d2c"; border-radius: 10; stroke-width: 2}}
+  you: {style: {fill: "#f4f4f5"; stroke: "#a1a1aa"; font-color: "#1d1d1f"; border-radius: 10; stroke-width: 2}}
+  chain: {style: {fill: "#eaf1fd"; stroke: "#4c7be0"; font-color: "#1b3a78"; border-radius: 10; stroke-width: 2}}
+  team: {style: {fill: "#f3efff"; stroke: "#7c5cd6"; font-color: "#3a2a73"; border-radius: 10; stroke-width: 2}}
+  ask: {style: {fill: "#fff8e6"; stroke: "#d6a019"; font-color: "#5c4300"; border-radius: 10; stroke-width: 2}}
+  ok: {style: {fill: "#12a477"; stroke: "#0f8a63"; font-color: "#ffffff"; border-radius: 10; stroke-width: 2; bold: true}}
+  bad: {style: {fill: "#fdeeee"; stroke: "#d64545"; font-color: "#7a1f1f"; border-radius: 10; stroke-width: 2}}
+  muted: {style: {fill: "#fafafa"; stroke: "#d4d4d8"; font-color: "#6b6b72"; border-radius: 10; stroke-dash: 3}}
+  box: {style: {fill: "#fbfbfb"; stroke: "#d4d4d8"; border-radius: 14; font-color: "#6b6b72"; stroke-dash: 3}}
+}
+(** -> **)[*].style: {stroke: "#8a8f96"; stroke-width: 2; font-color: "#3c3c40"; font-size: 14; italic: false}
+
+direction: down
+a: "Сумма на всех адресах\nклуба в этой сети" {class: chain}
+b: "минус комиссии сети\nза каждый перевод" {class: zk}
+c: "минус снятия, которые созданы,\nно ещё не выплачены" {class: zk}
+d: "Свободно ≥\nэта выплата?" {class: ask}
+ok: "Заявку можно принять,\nфишки можно снять" {class: ok}
+no: "Отказ: другая сеть\nили меньшая сумма" {class: bad}
+a -> b -> c -> d
+d -> ok: да
+d -> no: нет
 ```
 
 Проверка выполняется **дважды**: при создании заявки и перед снятием фишек. Поэтому не бывает, что фишки сняли, а выплатить нечем.

@@ -1,22 +1,20 @@
-// Every diagram gets a "full screen" button; the full-screen view zooms with the wheel / +/- and moves by dragging.
+// Diagrams (D2, rendered to SVG images at build time): each gets a frame and a "full screen" button.
+// The full-screen view zooms with the wheel / +/- and moves by dragging.
 (function () {
-  function makeViewer(svg) {
+  function makeViewer(img) {
     var ov = document.createElement('div');
     ov.className = 'zk-viewer';
     ov.innerHTML = '<div class="zk-viewer-bar"><span>Колесо мыши — масштаб · перетаскивание — сдвиг · Esc — закрыть</span>' +
       '<div><button type="button" data-z="-1">−</button><button type="button" data-z="0">100%</button><button type="button" data-z="1">+</button>' +
       '<button type="button" data-close>Закрыть ✕</button></div></div><div class="zk-viewer-stage"><div class="zk-viewer-canvas"></div></div>';
     var canvas = ov.querySelector('.zk-viewer-canvas'), stage = ov.querySelector('.zk-viewer-stage');
-    var copy = svg.cloneNode(true);
-    copy.removeAttribute('style'); copy.style.maxWidth = 'none';
-    var vb = (svg.getAttribute('viewBox') || '').split(/[\s,]+/).map(Number);
-    var w = vb[2] || svg.getBoundingClientRect().width, h = vb[3] || svg.getBoundingClientRect().height;
-    copy.setAttribute('width', w); copy.setAttribute('height', h);
+    var w = +img.getAttribute('width') || img.naturalWidth, h = +img.getAttribute('height') || img.naturalHeight;
+    var copy = new Image(); copy.src = img.currentSrc || img.src; copy.alt = img.alt; copy.width = w; copy.height = h; copy.draggable = false;
     canvas.appendChild(copy);
     document.body.appendChild(ov);
     document.documentElement.style.overflow = 'hidden';
-    var s = Math.min((stage.clientWidth - 40) / w, (stage.clientHeight - 40) / h, 2.5), x = 0, y = 0;
-    function fit() { x = (stage.clientWidth - w * s) / 2; y = Math.max(20, (stage.clientHeight - h * s) / 2); draw(); }
+    var s = Math.min((stage.clientWidth - 48) / w, (stage.clientHeight - 48) / h, 2), x = 0, y = 0;
+    function fit() { x = (stage.clientWidth - w * s) / 2; y = Math.max(24, (stage.clientHeight - h * s) / 2); draw(); }
     function draw() { canvas.style.transform = 'translate(' + x + 'px,' + y + 'px) scale(' + s + ')'; ov.querySelector('[data-z="0"]').textContent = Math.round(s * 100) + '%'; }
     function zoom(f, cx, cy) {
       var r = stage.getBoundingClientRect(); cx = cx == null ? r.width / 2 : cx - r.left; cy = cy == null ? r.height / 2 : cy - r.top;
@@ -37,16 +35,21 @@
     ov.querySelector('[data-close]').addEventListener('click', close);
   }
   function decorate() {
-    document.querySelectorAll('pre.mermaid, div.mermaid').forEach(function (box) {
-      var svg = box.querySelector('svg');
-      if (!svg || box.querySelector(':scope > .zk-full')) return;   // mermaid may redraw the box: check for the button itself
+    document.querySelectorAll('.sl-markdown-content img[src*="/d2/"], .sl-markdown-content img[src*="/diagrams/"]').forEach(function (img) {
+      if (img.closest('.zk-diagram')) return;
+      var box = document.createElement('figure');
+      box.className = 'zk-diagram';
+      img.parentNode.insertBefore(box, img);
+      var scroll = document.createElement('div'); scroll.className = 'zk-diagram-scroll';
+      scroll.appendChild(img); box.appendChild(scroll);
+      if (img.alt && img.alt !== 'Diagram') { var cap = document.createElement('figcaption'); cap.textContent = img.alt; box.appendChild(cap); }
       var b = document.createElement('button');
-      b.type = 'button'; b.className = 'zk-full'; b.innerHTML = '⤢ Во весь экран';
-      b.addEventListener('click', function (e) { e.stopPropagation(); makeViewer(box.querySelector('svg')); });
+      b.type = 'button'; b.className = 'zk-full'; b.textContent = '⤢ Во весь экран';
+      b.addEventListener('click', function () { makeViewer(img); });
       box.appendChild(b);
-      if (!box.dataset.zkClick) { box.dataset.zkClick = '1'; box.addEventListener('click', function (e) { if (e.target.closest('svg')) makeViewer(box.querySelector('svg')); }); }
+      img.addEventListener('click', function () { makeViewer(img); });
     });
   }
-  new MutationObserver(decorate).observe(document.documentElement, { childList: true, subtree: true });
   document.addEventListener('DOMContentLoaded', decorate);
+  if (document.readyState !== 'loading') decorate();
 })();

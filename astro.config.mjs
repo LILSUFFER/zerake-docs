@@ -1,21 +1,22 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import mermaid from 'astro-mermaid';
+import d2 from 'astro-d2';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://docs.zerake.com',
 	integrations: [
-		mermaid({
-			theme: 'default',
-			autoTheme: true,
-			mermaidConfig: {
-				fontFamily: 'Geist, -apple-system, Segoe UI, sans-serif',
-				themeVariables: { fontSize: '16px', fontFamily: 'Geist, -apple-system, Segoe UI, sans-serif' },
-				flowchart: { useMaxWidth: false, htmlLabels: true, nodeSpacing: 36, rankSpacing: 46, padding: 14, curve: 'basis', wrappingWidth: 220 },
-				sequence: { useMaxWidth: false, wrap: true, width: 170, actorFontSize: 15, messageFontSize: 15, noteFontSize: 14, boxMargin: 8, messageMargin: 34, mirrorActors: false },
-				state: { useMaxWidth: false },
+		d2({
+			experimental: { useD2js: true },
+			layout: 'elk',
+			pad: 24,
+			theme: { default: '0', dark: false },
+			fonts: {
+				regular: './src/fonts/Geist-Regular.ttf',
+				italic: './src/fonts/Geist-Regular.ttf',
+				semibold: './src/fonts/Geist-SemiBold.ttf',
+				bold: './src/fonts/Geist-SemiBold.ttf',
 			},
 		}),
 		starlight({
@@ -48,7 +49,7 @@ export default defineConfig({
 					{ label: 'Адреса клуба', slug: 'money/addresses' },
 					{ label: 'Пополнение', collapsed: false, items: [
 						{ label: 'По заявке: TRC20 и BEP20', slug: 'money/deposit-request' },
-						{ label: 'Личный адрес: TON и GRAM', slug: 'money/deposit-personal' },
+						{ label: 'Персональный адрес: TON и GRAM', slug: 'money/deposit-personal' },
 						{ label: 'Как сервер находит платёж', slug: 'money/detection' },
 					] },
 					{ label: 'Снятие', collapsed: false, items: [
