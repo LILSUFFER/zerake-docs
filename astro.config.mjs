@@ -50,7 +50,7 @@ export default defineConfig({
 				] },
 				{ label: 'Игрокам', items: [
 					{ label: 'Аккаунт', collapsed: true, items: [
-						{ label: 'ID в ClubGG', slug: 'account/clubgg-id' },
+						{ label: 'GG ID', slug: 'account/clubgg-id' },
 						{ label: 'Кошелёк для выплат', slug: 'account/payout-wallet' },
 						{ label: 'Секретная фраза', slug: 'account/secret-phrase' },
 						{ label: 'PIN-код и Face ID', slug: 'account/pin' },

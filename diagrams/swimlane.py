@@ -90,6 +90,10 @@ def edge_svg(pts, label=None):
 
 
 def render(spec):
+    # five or more lanes: narrower lanes and blocks so the whole diagram still fits the 760 px text column
+    global LANE_W, STEP_W, DEC_W, PILL_W
+    LANE_W = min(190, 760 // len(spec["lanes"]))
+    STEP_W, DEC_W, PILL_W = LANE_W - 28, LANE_W - 12, LANE_W - 34
     lanes = spec["lanes"]; nodes = {n["id"]: n for n in spec["nodes"]}
     rows = max(n["row"] for n in nodes.values()) + 1
     W, H = LANE_W * len(lanes), TOP + HEAD_H + ROW_H * rows + 16
