@@ -12,7 +12,6 @@ SPECS = {**S1, **S2}
 
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 FONT = "Segoe UI"
-LANE_W, HEAD_H, ROW_H, PAD_TOP = 220, 42, 84, 14
 SIZE = {}
 OVAL = "rounded=1;arcSize=50;html=0;fontStyle=1;"
 STYLE = {
@@ -25,57 +24,97 @@ STYLE = {
     "skip": OVAL + "fillColor=#F1F5F9;strokeColor=#94A3B8;fontColor=#334155;",       # ignored
 }
 COMMON = f"fontFamily={FONT};fontSize=13;strokeWidth=1.5;"
-LANE = (f"swimlane;horizontal=1;startSize={HEAD_H};fillColor=#F1F4F9;swimlaneFillColor=#FFFFFF;strokeColor=#94A3B8;"
-        f"fontColor=#1E293B;fontStyle=1;fontSize=14;fontFamily={FONT};collapsible=0;strokeWidth=1.2;")
 EDGE = (f"edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=10;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#1F2937;strokeWidth=1.6;"
         f"endArrow=block;endFill=1;endSize=7;fontFamily={FONT};fontSize=12;fontStyle=1;fontColor=#334155;labelBackgroundColor=#FFFFFF;")
-SIDE = {"right": "exitX=1;exitY=0.5;", "left": "exitX=0;exitY=0.5;", "bottom": "exitX=0.5;exitY=1;", "top": "exitX=0.5;exitY=0;", "down": "exitX=0.5;exitY=1;entryX=0.5;entryY=0;"}
+
+
+HEAD_W, COL_W, BLOCK_W, MAXC, BAND_GAP, PAD = 130, 160, 134, 7, 36, 34   # lanes are rows; the flow goes left to right
+LANE_ROW = "rounded=0;html=0;fillColor=#FFFFFF;strokeColor=#94A3B8;strokeWidth=1.2;"
+LANE_HEAD = (f"rounded=0;html=0;fillColor=#F1F4F9;strokeColor=#94A3B8;strokeWidth=1.2;"
+             f"fontColor=#1E293B;fontStyle=1;fontSize=13;fontFamily={FONT};align=center;verticalAlign=middle;")
+OFFPAGE = f"ellipse;html=0;fillColor=#1F2937;strokeColor=#1F2937;fontColor=#FFFFFF;fontStyle=1;fontSize=11;fontFamily={FONT};"
+# exit sides are written in the specs for a top-down flow; here the flow is left-to-right, so they turn by 90°
+TURN = {"bottom": "right", "top": "left", "left": "top", "right": "bottom", "down": "down"}
+SIDE = {"right": "exitX=1;exitY=0.5;", "left": "exitX=0;exitY=0.5;", "bottom": "exitX=0.5;exitY=1;", "top": "exitX=0.5;exitY=0;",
+        "down": "exitX=1;exitY=0.5;entryX=0;entryY=0.5;"}
 
 
 def build(name, spec):
     lanes = spec["lanes"]; nodes = spec["nodes"]; wide = spec.get("wide", {})
-    global LANE_W
-    cols = sum(wide.get(l, 1) for l in lanes)
-    LANE_W = 176 if cols >= 5 else 200          # fits the 900 px text column
-    nw = LANE_W - 22
 
-    def size(n):                                  # the block grows with its text: one action per block, 1–3 lines
-        k = n.get("kind", "step"); lines = n["text"].count(chr(10)) + 1
-        if k == "dec": return LANE_W - 12, 34 + 24 * lines
-        return nw, 22 + 18 * lines
-    lane_x, x = {}, 0
-    for l in lanes: lane_x[l] = x; x += wide.get(l, 1) * LANE_W
-    rows = max(n["row"] for n in nodes) + 1
-    row_h = [max([size(n)[1] for n in nodes if n["row"] == r] or [40]) + 30 for r in range(rows)]
-    row_y = [HEAD_H + PAD_TOP + sum(row_h[:r]) for r in range(rows)]
-    H = HEAD_H + PAD_TOP + sum(row_h) + 6
+    def text(n):                                  # re-wrap the words to the block width
+        k = n.get("kind", "step"); limit = 15 if k in ("dec", "start", "end", "fail", "skip", "status") else 18
+        words = n["text"].replace(chr(10), " ").split(); lines, cur = [], ""
+        for w in words:
+            if cur and len(cur) + 1 + len(w) > limit: lines.append(cur); cur = w
+            else: cur = (cur + " " + w).strip()
+        if cur: lines.append(cur)
+        return chr(10).join(lines)
+
+    def size(n):                                  # the block grows with its text: one action per block
+        k = n.get("kind", "step"); lines = text(n).count(chr(10)) + 1
+        if k == "dec": return BLOCK_W + 16, 28 + 20 * lines
+        return BLOCK_W, 18 + 17 * lines
+    cols = max(n["row"] for n in nodes) + 1
+    bands = (cols + MAXC - 1) // MAXC             # a long process continues on a second strip below, like a page break
+    per = (cols + bands - 1) // bands             # strips of about equal length
+    band_cols = [min(per, cols - b * per) for b in range(bands)]
+    maxc = per
+    sub_h = {l: max([size(n)[1] for n in nodes if n["lane"] == l] or [40]) + 26 for l in lanes}
+    lane_h = {l: sub_h[l] * wide.get(l, 1) for l in lanes}
+    band_lanes = [[l for l in lanes if any(n["lane"] == l and n["row"] // per == b for n in nodes)] for b in range(bands)]
+    lane_y, band_y, band_h, y = [], [], [], 0
+    for b in range(bands):
+        band_y.append(y); ly = {}
+        for l in band_lanes[b]: ly[l] = y; y += lane_h[l]
+        lane_y.append(ly); band_h.append(y - band_y[b]); y += BAND_GAP
     cells = ['<mxCell id="0"/>', '<mxCell id="1" parent="0"/>']
-    for i, lane in enumerate(lanes):
-        cells.append(f'<mxCell id="lane{i}" value="{html.escape(lane)}" style="{LANE}" vertex="1" parent="1">'
-                     f'<mxGeometry x="{lane_x[lane]}" y="0" width="{wide.get(lane, 1) * LANE_W}" height="{H}" as="geometry"/></mxCell>')
-    cx = {}
+    for b in range(bands):
+        bw = HEAD_W + PAD + band_cols[b] * COL_W + (PAD if b < bands - 1 else 0)
+        for i, lane in enumerate(band_lanes[b]):
+            cells.append(f'<mxCell id="row{b}_{i}" value="" style="{LANE_ROW}" vertex="1" parent="1">'
+                         f'<mxGeometry x="0" y="{lane_y[b][lane]}" width="{bw}" height="{lane_h[lane]}" as="geometry"/></mxCell>')
+            cells.append(f'<mxCell id="head{b}_{i}" value="{html.escape(lane)}" style="{LANE_HEAD}" vertex="1" parent="1">'
+                         f'<mxGeometry x="0" y="{lane_y[b][lane]}" width="{HEAD_W}" height="{lane_h[lane]}" as="geometry"/></mxCell>')
+    pos = {}; kind = {n["id"]: n.get("kind", "step") for n in nodes}; lane = {n["id"]: n["lane"] for n in nodes}
     for n in nodes:
-        k = n.get("kind", "step"); w, h = size(n)
-        c = lane_x[n["lane"]] + n.get("col", 0) * LANE_W + LANE_W / 2; cx[n["id"]] = c
-        y = row_y[n["row"]] + (row_h[n["row"]] - h) / 2
-        label = html.escape(n["text"]).replace("\n", "&#xa;")   # a real line break in the plain-text label
+        k = n.get("kind", "step"); w, h = size(n); c = n["row"]; b = c // per
+        x = HEAD_W + PAD + (c % per) * COL_W + (COL_W - w) / 2
+        y = lane_y[b][n["lane"]] + n.get("col", 0) * sub_h[n["lane"]] + (sub_h[n["lane"]] - h) / 2
+        pos[n["id"]] = (x, y, w, h, b)
+        label = html.escape(text(n)).replace("\n", "&#xa;")   # a real line break in the plain-text label
         cells.append(f'<mxCell id="n_{n["id"]}" value="{label}" style="{STYLE[k]}{COMMON}" vertex="1" parent="1">'
-                     f'<mxGeometry x="{c - w / 2:.0f}" y="{y:.0f}" width="{w}" height="{h}" as="geometry"/></mxCell>')
-    for i, e in enumerate(spec["edges"]):
-        a, b = e[0], e[1]; lab = e[2] if len(e) > 2 and e[2] else ""; side = e[3] if len(e) > 3 else None
-        st = EDGE + (SIDE[side] if side else "")
-        if side == "bottom" and cx[a] != cx[b]:      # down, then sideways into the target's near side
-            st += "entryX=1;entryY=0.5;" if cx[b] < cx[a] else "entryX=0;entryY=0.5;"
-        if side in ("left", "right"):                # sideways, then down into the target's top
-            st += "entryX=0.5;entryY=0;"
-        cells.append(f'<mxCell id="edge{i}" value="{html.escape(lab)}" style="{st}" edge="1" parent="1" source="n_{a}" target="n_{b}">'
+                     f'<mxGeometry x="{x:.0f}" y="{y:.0f}" width="{w}" height="{h}" as="geometry"/></mxCell>')
+
+    def edge(i, a, b, lab, st):
+        cells.append(f'<mxCell id="edge{i}" value="{html.escape(lab)}" style="{st}" edge="1" parent="1" source="{a}" target="{b}">'
                      f'<mxGeometry relative="1" as="geometry"/></mxCell>')
+    jumps = 0
+    for i, e in enumerate(spec["edges"]):
+        a, b = e[0], e[1]; lab = e[2] if len(e) > 2 and e[2] else ""; side = TURN.get(e[3]) if len(e) > 3 and e[3] else None
+        ax, ay, aw, ah, ab = pos[a]; bx, by_, bw_, bh, bb = pos[b]
+        if not side and kind[b] == "dec" and lane[a] != lane[b]: side = "bottom" if by_ > ay else "top"   # into a check in another row: down first, so the line never runs under a result block
+        st = EDGE + (SIDE[side] if side else "")
+        if side == "right" and ay != by_:            # sideways, then up/down into the target's near side
+            st += "entryX=0.5;entryY=1;" if by_ < ay else "entryX=0.5;entryY=0;"
+        if side in ("top", "bottom"):                # up/down, then sideways into the target's left side
+            st += "entryX=0;entryY=0.5;"
+        if ab == bb:
+            edge(i, "n_" + a, "n_" + b, lab, st); continue
+        # the flow continues on the next strip: a numbered connector at the end of this one and at the start of the next
+        jumps += 1; tag = chr(64 + jumps)
+        ox = HEAD_W + PAD + band_cols[ab] * COL_W + 6; oy = ay + ah / 2 - 11
+        cells.append(f'<mxCell id="off{i}a" value="{tag}" style="{OFFPAGE}" vertex="1" parent="1"><mxGeometry x="{ox:.0f}" y="{oy:.0f}" width="22" height="22" as="geometry"/></mxCell>')
+        ix = HEAD_W + 8; iy = by_ + bh / 2 - 11
+        cells.append(f'<mxCell id="off{i}b" value="{tag}" style="{OFFPAGE}" vertex="1" parent="1"><mxGeometry x="{ix:.0f}" y="{iy:.0f}" width="22" height="22" as="geometry"/></mxCell>')
+        edge(i, "n_" + a, f"off{i}a", lab, EDGE + "exitX=1;exitY=0.5;entryX=0;entryY=0.5;")
+        edge(f"{i}b", f"off{i}b", "n_" + b, "", EDGE + "exitX=1;exitY=0.5;entryX=0;entryY=0.5;")
     model = f'<mxGraphModel grid="0" page="0"><root>{"".join(cells)}</root></mxGraphModel>'
     return f'<mxfile><diagram name="{html.escape(spec["title"])}">{model}</diagram></mxfile>', model
 
 
-LEGEND = [("start", "Начало", "событие, с которого\nвсё начинается"), ("step", "Действие", "делает участник\nэтой колонки"),
-          ("dec", "Проверка?", "Да — дальше вниз,\nНет — в сторону"), ("status", "DEP-… / WD-…", "заявка меняет\nстатус"),
+LEGEND = [("start", "Начало", "событие, с которого\nвсё начинается"), ("step", "Действие", "делает участник\nэтой строки"),
+          ("dec", "Проверка?", "Да — дальше вправо,\nНет — вверх или вниз"), ("status", "DEP-… / WD-…", "заявка меняет\nстатус"),
           ("end", "Итог", "чем закончилось"), ("fail", "Отказ", "проверка\nне пройдена"), ("skip", "Пропуск", "не учитывается")]
 
 def legend():

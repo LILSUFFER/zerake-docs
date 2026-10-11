@@ -6,7 +6,7 @@
   --sl-text-h2: 1.5rem;
   --sl-text-h3: 1.2rem;
   --sl-sidebar-width: 17.5rem;
-  --sl-content-width: 58rem;
+  --sl-content-width: 86rem;
   --sl-nav-height: 3.5rem;
   --sl-color-accent-low: #06281d;
   --sl-color-accent: #19c58f;
@@ -192,3 +192,6 @@ starlight-tabs [role='tab'][aria-selected='true'] { color: var(--sl-color-white)
 
 /* a diagram always fits the window height on any screen; full size in the full-screen view */
 
+
+/* wide page for the diagrams; text stays at a readable width */
+.sl-markdown-content > :not(.zk-diagram):not(figure):not(table):not(.zk-tiles) { max-width: 58rem; }
