@@ -3,10 +3,10 @@
 import Default from '@astrojs/starlight/components/SiteTitle.astro';
 const links = [
 	{ label: 'Быстрый старт', href: '/start/quickstart/' },
-	{ label: 'Пополнение', href: '/top-up/how-it-works/' },
-	{ label: 'Снятие', href: '/cash-out/how-it-works/' },
-	{ label: 'Справочник', href: '/reference/networks/' },
+	{ label: 'Движение средств', href: '/money/overview/' },
+	{ label: 'Безопасность', href: '/security/model/' },
 	{ label: 'Устройство', href: '/architecture/overview/' },
+	{ label: 'Команде', href: '/team/admin-panel/' },
 ];
 const path = Astro.url.pathname;
 const section = (href: string) => '/' + href.split('/')[1] + '/';

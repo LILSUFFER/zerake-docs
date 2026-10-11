@@ -7,7 +7,17 @@ import mermaid from 'astro-mermaid';
 export default defineConfig({
 	site: 'https://docs.zerake.com',
 	integrations: [
-		mermaid({ theme: 'default', autoTheme: true }),
+		mermaid({
+			theme: 'default',
+			autoTheme: true,
+			mermaidConfig: {
+				fontFamily: 'Geist, -apple-system, Segoe UI, sans-serif',
+				themeVariables: { fontSize: '16px', fontFamily: 'Geist, -apple-system, Segoe UI, sans-serif' },
+				flowchart: { useMaxWidth: false, htmlLabels: true, nodeSpacing: 36, rankSpacing: 46, padding: 14, curve: 'basis', wrappingWidth: 220 },
+				sequence: { useMaxWidth: false, wrap: true, width: 170, actorFontSize: 15, messageFontSize: 15, noteFontSize: 14, boxMargin: 8, messageMargin: 34, mirrorActors: false },
+				state: { useMaxWidth: false },
+			},
+		}),
 		starlight({
 			title: 'Zerake Docs',
 			description: 'Документация клуба Zerake: аккаунт, пополнение и снятие фишек, сети, безопасность и устройство системы.',
@@ -20,6 +30,7 @@ export default defineConfig({
 			head: [
 				{ tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap' } },
 				// light by default, like Cloudflare's docs; the switch in the header still works
+				{ tag: 'script', attrs: { src: '/zk-diagrams.js', defer: true } },
 				{ tag: 'script', content: "try{if(!localStorage.getItem('starlight-theme')){localStorage.setItem('starlight-theme','light');document.documentElement.dataset.theme='light'}}catch(e){}" },
 			],
 			lastUpdated: true,
@@ -32,6 +43,23 @@ export default defineConfig({
 					{ label: 'Словарь', slug: 'start/glossary' },
 					{ label: 'Вопросы и ответы', slug: 'faq' },
 				] },
+				{ label: 'Движение средств', items: [
+					{ label: 'Обзор', slug: 'money/overview' },
+					{ label: 'Адреса клуба', slug: 'money/addresses' },
+					{ label: 'Пополнение', collapsed: false, items: [
+						{ label: 'По заявке: TRC20 и BEP20', slug: 'money/deposit-request' },
+						{ label: 'Личный адрес: TON и GRAM', slug: 'money/deposit-personal' },
+						{ label: 'Как сервер находит платёж', slug: 'money/detection' },
+					] },
+					{ label: 'Снятие', collapsed: false, items: [
+						{ label: 'Снятие фишек', slug: 'money/withdrawal' },
+						{ label: 'Откуда идёт выплата', slug: 'money/payout-sources' },
+					] },
+					{ label: 'Комиссии', slug: 'money/fees' },
+					{ label: 'Курс GRAM', slug: 'money/gram-rate' },
+					{ label: 'Лимиты и проверки', slug: 'money/limits' },
+					{ label: 'Ошибки и спорные платежи', slug: 'money/problems' },
+				] },
 				{ label: 'Игрокам', items: [
 					{ label: 'Аккаунт', collapsed: true, items: [
 						{ label: 'ID в ClubGG', slug: 'account/clubgg-id' },
@@ -40,26 +68,11 @@ export default defineConfig({
 						{ label: 'PIN-код и Face ID', slug: 'account/pin' },
 						{ label: 'Смена кошелька и восстановление', slug: 'account/recovery' },
 					] },
-					{ label: 'Пополнение фишек', collapsed: true, items: [
-						{ label: 'Как это работает', slug: 'top-up/how-it-works' },
-						{ label: 'TRC20 и BEP20: заявка', slug: 'top-up/request' },
-						{ label: 'TON и GRAM: личный адрес', slug: 'top-up/personal-address' },
-						{ label: 'Статусы и проблемы', slug: 'top-up/statuses' },
-					] },
-					{ label: 'Снятие фишек', collapsed: true, items: [
-						{ label: 'Как это работает', slug: 'cash-out/how-it-works' },
-						{ label: 'Комиссии', slug: 'cash-out/fees' },
-						{ label: 'Проверка платёжеспособности', slug: 'cash-out/solvency' },
-						{ label: 'Статусы и проблемы', slug: 'cash-out/statuses' },
-					] },
 					{ label: 'Столы', collapsed: true, items: [
 						{ label: 'Уровни столов', slug: 'tables/levels' },
 						{ label: 'Bad Beat Jackpot', slug: 'tables/jackpot' },
 						{ label: 'Честная игра', slug: 'tables/fair-play' },
 					] },
-				] },
-				{ label: 'Справочник', items: [
-					{ label: 'Сети, минимумы и лимиты', slug: 'reference/networks' },
 					{ label: 'Номера операций', slug: 'reference/operations' },
 					{ label: 'Уведомления', slug: 'reference/notifications' },
 				] },
@@ -68,15 +81,10 @@ export default defineConfig({
 					{ label: 'Как защитить себя', slug: 'security/player' },
 				] },
 				{ label: 'Устройство системы', items: [
-					{ label: 'Архитектура', collapsed: true, items: [
-						{ label: 'Обзор архитектуры', slug: 'architecture/overview' },
-						{ label: 'Поток пополнения', slug: 'architecture/top-up-flow' },
-						{ label: 'Поток выплаты', slug: 'architecture/payout-flow' },
-						{ label: 'Хранение средств', slug: 'architecture/funds' },
-						{ label: 'Выдача фишек', slug: 'architecture/chips' },
-						{ label: 'Боты Telegram', slug: 'architecture/bots' },
-						{ label: 'Журнал операций', slug: 'architecture/audit-log' },
-					] },
+					{ label: 'Обзор архитектуры', slug: 'architecture/overview' },
+					{ label: 'Выдача фишек', slug: 'architecture/chips' },
+					{ label: 'Боты Telegram', slug: 'architecture/bots' },
+					{ label: 'Журнал операций', slug: 'architecture/audit-log' },
 				] },
 				{ label: 'Команде', items: [
 					{ label: 'Админка', slug: 'team/admin-panel' },

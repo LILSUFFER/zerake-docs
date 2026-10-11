@@ -28,14 +28,14 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
       <a href="/account/recovery/"><b>Восстановление</b><span>Новый Telegram или новый кошелёк</span></a>
     </div>
   </TabItem>
-  <TabItem label="Пополнение и снятие">
+  <TabItem label="Движение средств">
     <div class="zk-tiles">
-      <a href="/top-up/how-it-works/"><b>Как работает пополнение</b><span>От перевода до фишек на ID</span></a>
-      <a href="/top-up/request/"><b>TRC20 и BEP20</b><span>Заявка с точной суммой на 30 минут</span></a>
-      <a href="/top-up/personal-address/"><b>TON и GRAM</b><span>Личный адрес, любая сумма</span></a>
-      <a href="/cash-out/how-it-works/"><b>Как работает снятие</b><span>От заявки до денег на кошельке</span></a>
-      <a href="/cash-out/fees/"><b>Комиссии</b><span>Сколько стоит вывод в каждой сети</span></a>
-      <a href="/reference/networks/"><b>Сети и лимиты</b><span>Минимумы, максимумы, курсы</span></a>
+      <a href="/money/deposit-request/"><b>Как работает пополнение</b><span>От перевода до фишек на ID</span></a>
+      <a href="/money/deposit-request/"><b>TRC20 и BEP20</b><span>Заявка с точной суммой на 30 минут</span></a>
+      <a href="/money/deposit-personal/"><b>TON и GRAM</b><span>Личный адрес, любая сумма</span></a>
+      <a href="/money/withdrawal/"><b>Как работает снятие</b><span>От заявки до денег на кошельке</span></a>
+      <a href="/money/fees/"><b>Комиссии</b><span>Сколько стоит вывод в каждой сети</span></a>
+      <a href="/money/overview/"><b>Сети и лимиты</b><span>Минимумы, максимумы, курсы</span></a>
     </div>
   </TabItem>
   <TabItem label="Столы">
@@ -48,9 +48,9 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
   <TabItem label="Устройство">
     <div class="zk-tiles">
       <a href="/architecture/overview/"><b>Архитектура</b><span>Компоненты и как они связаны</span></a>
-      <a href="/architecture/top-up-flow/"><b>Поток пополнения</b><span>Что происходит внутри</span></a>
-      <a href="/architecture/payout-flow/"><b>Поток выплаты</b><span>Проверки, выбор адреса, сбои</span></a>
-      <a href="/architecture/funds/"><b>Хранение средств</b><span>Где лежат деньги клуба</span></a>
+      <a href="/money/detection/"><b>Поток пополнения</b><span>Что происходит внутри</span></a>
+      <a href="/money/payout-sources/"><b>Поток выплаты</b><span>Проверки, выбор адреса, сбои</span></a>
+      <a href="/money/addresses/"><b>Хранение средств</b><span>Где лежат деньги клуба</span></a>
       <a href="/security/model/"><b>Безопасность</b><span>Как защищены деньги игроков</span></a>
       <a href="/architecture/audit-log/"><b>Журнал операций</b><span>Неизменяемая история</span></a>
     </div>
