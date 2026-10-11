@@ -3,10 +3,10 @@
 # Usage: python diagrams/swimlane.py   (writes public/diagrams/*.svg from SPECS in diagrams/specs.py)
 import html, os, sys
 
-LANE_W, HEAD_H, ROW_H, TOP = 210, 46, 104, 26
-STEP_W, STEP_H = 172, 56
-DEC_W, DEC_H = 164, 92
-PILL_W, PILL_H = 140, 42
+LANE_W, HEAD_H, ROW_H, TOP = 190, 40, 84, 8
+STEP_W, STEP_H = 162, 46
+DEC_W, DEC_H = 176, 64
+PILL_W, PILL_H = 154, 38
 FONT = "Segoe UI, -apple-system, Roboto, Helvetica, Arial, sans-serif"
 C = {
     "lane_bg": "#ffffff", "lane_line": "#94a3b8", "head_bg": "#f1f4f9", "head_text": "#1e293b",
@@ -41,11 +41,11 @@ def node_svg(lanes, n):
     x, y = center(lanes, n); w, h = size(n); k = n.get("kind", "step")
     if k == "dec":
         pts = f"{x},{y - h / 2} {x + w / 2},{y} {x},{y + h / 2} {x - w / 2},{y}"
-        return f'<polygon points="{pts}" fill="{C["dec_fill"]}" stroke="{C["dec_line"]}" stroke-width="1.6"/>' + text_block(x, y, n["text"], C["dec_text"], 13)
+        return f'<polygon points="{pts}" fill="{C["dec_fill"]}" stroke="{C["dec_line"]}" stroke-width="1.6"/>' + text_block(x, y, n["text"], C["dec_text"], 12)
     pal = {"start": "start", "end": "end", "bad": "bad", "ok": "ok"}.get(k, "step")
     r = h / 2 if k in ("start", "end") else 4
     return (f'<rect x="{x - w / 2:.1f}" y="{y - h / 2:.1f}" width="{w}" height="{h}" rx="{r}" fill="{C[pal + "_fill"]}" stroke="{C[pal + "_line"]}" stroke-width="1.6"/>'
-            + text_block(x, y, n["text"], C[pal + "_text"], 14, 600 if k == "ok" else 500))
+            + text_block(x, y, n["text"], C[pal + "_text"], 13, 600 if k == "ok" else 500))
 
 
 def port(lanes, n, side):
@@ -77,18 +77,22 @@ def edge_svg(pts, label=None):
     s = f'<path d="{d}" fill="none" stroke="{C["edge"]}" stroke-width="1.6" marker-end="url(#arr)"/>'
     if label:
         (x1, y1), (x2, y2) = pts[0], pts[1]
-        if abs(x2 - x1) > abs(y2 - y1): lx, ly = x1 + (x2 - x1) * 0.42, y1
-        else: lx, ly = x1, y1 + (y2 - y1) * 0.45
         w = 9 * len(label) + 14
+        if abs(x2 - x1) > abs(y2 - y1):
+            if abs(x2 - x1) < w + 40: lx, ly = (x1 + x2) / 2, y1 - 14      # short segment: label above the line
+            else: lx, ly = x1 + (x2 - x1) * 0.42, y1
+        else:
+            if abs(y2 - y1) < 50: lx, ly = x1 + w / 2 + 8, (y1 + y2) / 2    # short segment: label beside the line
+            else: lx, ly = x1, y1 + (y2 - y1) * 0.45
         s += (f'<rect x="{lx - w / 2:.1f}" y="{ly - 11:.1f}" width="{w}" height="22" rx="4" fill="#ffffff"/>'
-              f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="middle" dominant-baseline="central" font-size="13" font-weight="500" fill="{C["edge_label"]}">{esc(label)}</text>')
+              f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="{C["edge_label"]}">{esc(label)}</text>')
     return s
 
 
 def render(spec):
     lanes = spec["lanes"]; nodes = {n["id"]: n for n in spec["nodes"]}
     rows = max(n["row"] for n in nodes.values()) + 1
-    W, H = LANE_W * len(lanes), TOP + HEAD_H + ROW_H * rows + 18
+    W, H = LANE_W * len(lanes), TOP + HEAD_H + ROW_H * rows + 16
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" font-family="{FONT}">',
            f'<title>{esc(spec["title"])}</title>',
            '<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">'
@@ -99,7 +103,7 @@ def render(spec):
     out.append(f'<rect x="0.8" y="{TOP}" width="{W - 1.6}" height="{HEAD_H}" fill="{C["head_bg"]}" stroke="{C["lane_line"]}" stroke-width="1.4"/>')
     for i, name in enumerate(lanes):
         if i: out.append(f'<line x1="{LANE_W * i}" y1="{TOP}" x2="{LANE_W * i}" y2="{H - 10}" stroke="{C["lane_line"]}" stroke-width="1.4"/>')
-        out.append(text_block(LANE_W * i + LANE_W / 2, TOP + HEAD_H / 2, name, C["head_text"], 15, 600))
+        out.append(text_block(LANE_W * i + LANE_W / 2, TOP + HEAD_H / 2, name, C["head_text"], 14, 600))
     for e in spec["edges"]:
         a, b = nodes[e[0]], nodes[e[1]]
         out.append(edge_svg(route(lanes, a, b, e[3] if len(e) > 3 else None), e[2] if len(e) > 2 else None))
@@ -113,6 +117,8 @@ if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     sys.path.insert(0, here)
     from specs import SPECS
+    from specs2 import SPECS2
+    SPECS = {**SPECS, **SPECS2}
     dst = os.path.join(here, "..", "public", "diagrams"); os.makedirs(dst, exist_ok=True)
     for name, spec in SPECS.items():
         open(os.path.join(dst, name + ".svg"), "w", encoding="utf-8").write(render(spec))

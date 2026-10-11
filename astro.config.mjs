@@ -1,24 +1,11 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import d2 from 'astro-d2';
 
 // https://astro.build/config
 export default defineConfig({
 	site: 'https://docs.zerake.com',
 	integrations: [
-		d2({
-			experimental: { useD2js: true },
-			layout: 'elk',
-			pad: 24,
-			theme: { default: '0', dark: false },
-			fonts: {
-				regular: './src/fonts/Geist-Regular.ttf',
-				italic: './src/fonts/Geist-Regular.ttf',
-				semibold: './src/fonts/Geist-SemiBold.ttf',
-				bold: './src/fonts/Geist-SemiBold.ttf',
-			},
-		}),
 		starlight({
 			title: 'Zerake Docs',
 			description: 'Документация клуба Zerake: аккаунт, пополнение и снятие фишек, сети, безопасность и устройство системы.',
@@ -45,21 +32,21 @@ export default defineConfig({
 					{ label: 'Вопросы и ответы', slug: 'faq' },
 				] },
 				{ label: 'Движение средств', items: [
-					{ label: 'Обзор', slug: 'money/overview' },
+					{ label: 'Карта и обзор', slug: 'money/overview' },
 					{ label: 'Адреса клуба', slug: 'money/addresses' },
 					{ label: 'Пополнение', collapsed: false, items: [
-						{ label: 'По заявке: TRC20 и BEP20', slug: 'money/deposit-request' },
-						{ label: 'Персональный адрес: TON и GRAM', slug: 'money/deposit-personal' },
-						{ label: 'Как сервер находит платёж', slug: 'money/detection' },
+						{ label: 'Заявки (TRC20, BEP20)', slug: 'money/deposit-request' },
+						{ label: 'Персональные адреса (TON)', slug: 'money/deposit-personal' },
+						{ label: 'Поиск платежей', slug: 'money/detection' },
 					] },
 					{ label: 'Снятие', collapsed: false, items: [
-						{ label: 'Снятие фишек', slug: 'money/withdrawal' },
+						{ label: 'Снятие и выплата', slug: 'money/withdrawal' },
 						{ label: 'Откуда идёт выплата', slug: 'money/payout-sources' },
 					] },
 					{ label: 'Комиссии', slug: 'money/fees' },
 					{ label: 'Курс GRAM', slug: 'money/gram-rate' },
 					{ label: 'Лимиты и проверки', slug: 'money/limits' },
-					{ label: 'Ошибки и спорные платежи', slug: 'money/problems' },
+					{ label: 'Спорные платежи', slug: 'money/problems' },
 				] },
 				{ label: 'Игрокам', items: [
 					{ label: 'Аккаунт', collapsed: true, items: [
