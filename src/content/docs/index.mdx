@@ -1,0 +1,65 @@
+---
+title: Документация Zerake
+description: Документация клуба Zerake — аккаунт, пополнение и снятие фишек, сети, безопасность и устройство системы.
+tableOfContents: false
+pagefind: true
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+<div class="zk-banner">
+  <div>
+    <b>Нужна помощь человека?</b>
+    <p>Напишите в поддержку: ответит кто-то из команды. Приложите номер операции `DEP-…` или `WD-…` — так найдём быстрее.</p>
+  </div>
+  <a class="zk-btn zk-btn-primary" href="https://t.me/zerakebot" target="_blank" rel="noopener">Написать</a>
+</div>
+
+<h2 class="zk-h2">Всё о клубе</h2>
+
+<Tabs>
+  <TabItem label="Игрокам">
+    <div class="zk-tiles">
+      <a href="/start/quickstart/"><b>Быстрый старт</b><span>Пять шагов от бота до первой раздачи</span></a>
+      <a href="/account/clubgg-id/"><b>ID в ClubGG</b><span>Куда приходят фишки</span></a>
+      <a href="/account/payout-wallet/"><b>Кошелёк для выплат</b><span>Почему выплата идёт только вам</span></a>
+      <a href="/account/secret-phrase/"><b>Секретная фраза</b><span>12 слов, которые защищают аккаунт</span></a>
+      <a href="/account/pin/"><b>PIN и Face ID</b><span>Второй замок на приложении</span></a>
+      <a href="/account/recovery/"><b>Восстановление</b><span>Новый Telegram или новый кошелёк</span></a>
+    </div>
+  </TabItem>
+  <TabItem label="Пополнение и снятие">
+    <div class="zk-tiles">
+      <a href="/top-up/how-it-works/"><b>Как работает пополнение</b><span>От перевода до фишек на ID</span></a>
+      <a href="/top-up/request/"><b>TRC20 и BEP20</b><span>Заявка с точной суммой на 30 минут</span></a>
+      <a href="/top-up/personal-address/"><b>TON и GRAM</b><span>Личный адрес, любая сумма</span></a>
+      <a href="/cash-out/how-it-works/"><b>Как работает снятие</b><span>От заявки до денег на кошельке</span></a>
+      <a href="/cash-out/fees/"><b>Комиссии</b><span>Сколько стоит вывод в каждой сети</span></a>
+      <a href="/reference/networks/"><b>Сети и лимиты</b><span>Минимумы, максимумы, курсы</span></a>
+    </div>
+  </TabItem>
+  <TabItem label="Столы">
+    <div class="zk-tiles">
+      <a href="/tables/levels/"><b>Уровни столов</b><span>14 уровней от Meteor до Infinity</span></a>
+      <a href="/tables/jackpot/"><b>Bad Beat Jackpot</b><span>Как копится и кому выплачивается</span></a>
+      <a href="/tables/fair-play/"><b>Честная игра</b><span>Сговор, мультиаккаунты, последствия</span></a>
+    </div>
+  </TabItem>
+  <TabItem label="Устройство">
+    <div class="zk-tiles">
+      <a href="/architecture/overview/"><b>Архитектура</b><span>Компоненты и как они связаны</span></a>
+      <a href="/architecture/top-up-flow/"><b>Поток пополнения</b><span>Что происходит внутри</span></a>
+      <a href="/architecture/payout-flow/"><b>Поток выплаты</b><span>Проверки, выбор адреса, сбои</span></a>
+      <a href="/architecture/funds/"><b>Хранение средств</b><span>Где лежат деньги клуба</span></a>
+      <a href="/security/model/"><b>Безопасность</b><span>Как защищены деньги игроков</span></a>
+      <a href="/architecture/audit-log/"><b>Журнал операций</b><span>Неизменяемая история</span></a>
+    </div>
+  </TabItem>
+  <TabItem label="Команде">
+    <div class="zk-tiles">
+      <a href="/team/admin-panel/"><b>Админка</b><span>Разделы и права</span></a>
+      <a href="/team/queue/"><b>Очередь заявок</b><span>Выдача и снятие фишек</span></a>
+      <a href="/team/support/"><b>Поддержка</b><span>Как отвечать игрокам</span></a>
+    </div>
+  </TabItem>
+</Tabs>

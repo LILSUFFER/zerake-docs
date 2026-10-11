@@ -1,5 +1,6 @@
 ---
 // Page title like Cloudflare's docs: breadcrumbs above, "last updated" under it, a thin line below.
+// The home page gets a big title with two pill buttons instead.
 import Default from '@astrojs/starlight/components/PageTitle.astro';
 
 const route = Astro.locals.starlightRoute;
@@ -19,16 +20,30 @@ const isHome = route.id === '' || route.id === 'index';
 const updated = route.lastUpdated;
 ---
 
-{!isHome && (
-	<nav class="zk-crumbs" aria-label="Путь">
-		<a href="/">Документация</a>
-		{crumbs.map((c) => (<><span class="sep">/</span><span>{c}</span></>))}
-	</nav>
+{isHome ? (
+	<div class="zk-hero">
+		<h1 id="_top">Документация Zerake</h1>
+		<p>Всё о клубе без рейка: аккаунт, пополнение и снятие фишек, сети, безопасность и как всё устроено внутри.</p>
+		<div class="zk-actions">
+			<a class="zk-btn zk-btn-primary" href="/start/quickstart/">Быстрый старт</a>
+			<a class="zk-btn zk-btn-ghost" href="https://t.me/zerakebot" target="_blank" rel="noopener">
+				<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M21.94 4.34 18.7 19.6c-.24 1.08-.88 1.35-1.78.84l-4.92-3.63-2.37 2.29c-.26.26-.48.48-.99.48l.35-5.01 9.12-8.24c.4-.35-.09-.55-.61-.2L6.2 13.22 1.34 11.7c-1.06-.33-1.08-1.06.22-1.57L20.58 2.8c.88-.32 1.65.2 1.36 1.54z"/></svg>
+				Открыть @zerakebot
+			</a>
+		</div>
+	</div>
+) : (
+	<>
+		<nav class="zk-crumbs" aria-label="Путь">
+			<a href="/">Документация</a>
+			{crumbs.map((c) => (<><span class="sep">/</span><span>{c}</span></>))}
+		</nav>
+		<Default />
+		<div class="zk-meta">
+			{updated && <span>Обновлено {updated.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
+		</div>
+	</>
 )}
-<Default />
-<div class="zk-meta">
-	{updated && <span>Обновлено {updated.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
-</div>
 
 <style>
 	.zk-crumbs { display: flex; flex-wrap: wrap; gap: .4rem; font-size: .82rem; color: var(--sl-color-gray-3); margin-bottom: .9rem; }
@@ -37,4 +52,9 @@ const updated = route.lastUpdated;
 	.zk-crumbs .sep { color: var(--sl-color-gray-4); }
 	.zk-meta { display: flex; gap: 1rem; font-size: .82rem; color: var(--sl-color-gray-3); margin-top: .6rem; padding-bottom: 1rem; border-bottom: 1px solid var(--sl-color-hairline); }
 	.zk-meta:empty { display: none; }
+
+	.zk-hero { padding: 2.5rem 0 1rem; }
+	.zk-hero h1 { font-size: clamp(2.4rem, 5vw, 3.6rem); font-weight: 500; letter-spacing: -.035em; line-height: 1.05; margin: 0; color: var(--sl-color-white); }
+	.zk-hero p { max-width: 30rem; margin: 1.1rem 0 0; font-size: 1.15rem; line-height: 1.55; color: var(--sl-color-gray-3); }
+	.zk-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 1.8rem; }
 </style>
