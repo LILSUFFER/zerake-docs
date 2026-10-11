@@ -1,7 +1,7 @@
 /* Zerake docs — a clean, Cloudflare-docs-like look: white page, thin borders, uppercase section labels,
    compact sidebar, our green as the only accent. Dark theme keeps the same structure. */
 :root {
-  --sl-font: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --sl-font: 'Geist', -apple-system, 'Segoe UI', Roboto, sans-serif;
   --sl-text-h1: 2.25rem;
   --sl-text-h2: 1.5rem;
   --sl-text-h3: 1.2rem;
