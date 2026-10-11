@@ -1,13 +1,84 @@
-/* Zerake colours: the site's green as the accent; Starlight's own greys for light and dark */
+/* Zerake docs — a clean, Cloudflare-docs-like look: white page, thin borders, uppercase section labels,
+   compact sidebar, our green as the only accent. Dark theme keeps the same structure. */
 :root {
+  --sl-font: 'Inter', -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --sl-text-h1: 2.25rem;
+  --sl-text-h2: 1.5rem;
+  --sl-text-h3: 1.2rem;
+  --sl-sidebar-width: 17.5rem;
+  --sl-content-width: 48rem;
+  --sl-nav-height: 3.5rem;
   --sl-color-accent-low: #06281d;
   --sl-color-accent: #19c58f;
   --sl-color-accent-high: #b8f3df;
-  --sl-font: 'Geist', -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 :root[data-theme='light'] {
-  --sl-color-accent-low: #d4f7ea;
+  --sl-color-accent-low: #e3f8ef;
   --sl-color-accent: #0f8a63;
   --sl-color-accent-high: #064a35;
+  --sl-color-white: #1d1d1f;          /* text */
+  --sl-color-gray-1: #2b2b2e;
+  --sl-color-gray-2: #3c3c40;
+  --sl-color-gray-3: #6b6b72;
+  --sl-color-gray-4: #9a9aa1;
+  --sl-color-gray-5: #e5e5e7;         /* borders */
+  --sl-color-gray-6: #f3f3f4;         /* soft fill */
+  --sl-color-gray-7: #fafafa;
+  --sl-color-black: #ffffff;          /* page */
+  --sl-color-bg-nav: #ffffff;
+  --sl-color-bg-sidebar: #ffffff;
+  --sl-color-hairline: #e5e5e7;
+  --sl-color-hairline-light: #ececee;
+  --sl-color-hairline-shade: #e5e5e7;
 }
-.site-title img { height: 1.6rem; width: auto; }
+
+/* header: logo + a small DOCS tag, a thin line under it */
+.header { border-bottom: 1px solid var(--sl-color-hairline); }
+.site-title img { height: 1.35rem; width: auto; }
+.site-title::after {
+  content: 'DOCS'; margin-left: .6rem; padding: .05rem .4rem; border: 1px solid var(--sl-color-hairline);
+  border-radius: .3rem; font-size: .62rem; letter-spacing: .12em; font-weight: 600; color: var(--sl-color-gray-3);
+}
+
+/* sidebar: uppercase section labels, small items, a soft grey pill for the current page */
+.sidebar-pane { border-inline-end: 1px solid var(--sl-color-hairline); }
+.sidebar-content { padding-top: 1rem; }
+.sidebar-content ul.top-level > li { margin-top: 1rem; }
+.sidebar-content ul.top-level > li > details > summary { cursor: default; pointer-events: none; padding-block: .1rem .35rem; }
+.sidebar-content ul.top-level > li > details > summary .caret { display: none; }
+.sidebar-content ul.top-level > li > details > summary .group-label .large {
+  font-size: .72rem; font-weight: 500; text-transform: uppercase; letter-spacing: .09em; color: var(--sl-color-gray-3);
+}
+.sidebar-content ul.top-level > li > details > ul { border-inline-start: 0 !important; margin: 0 !important; padding-inline-start: 0 !important; }
+.sidebar-content a {
+  font-size: .875rem; padding: .35rem .6rem; border-radius: .4rem; color: var(--sl-color-gray-2);
+}
+.sidebar-content a:hover { background: var(--sl-color-gray-6); color: var(--sl-color-white); }
+.sidebar-content a[aria-current='page'],
+.sidebar-content a[aria-current='page']:hover {
+  background: var(--sl-color-gray-6); color: var(--sl-color-white); font-weight: 600;
+}
+/* nested groups (Аккаунт, Пополнение…): a row with a chevron, like Cloudflare's product groups */
+.sidebar-content ul.top-level ul details > summary { padding: .35rem .6rem; border-radius: .4rem; }
+.sidebar-content ul.top-level ul details > summary:hover { background: var(--sl-color-gray-6); }
+.sidebar-content ul.top-level ul details > summary .group-label .large { font-size: .875rem; font-weight: 400; color: var(--sl-color-gray-2); }
+.sidebar-content ul.top-level ul details > ul { margin-inline-start: .9rem; border-inline-start: 1px solid var(--sl-color-hairline); padding-inline-start: .3rem; }
+
+/* content */
+.content-panel { border-top: 0; }
+.sl-markdown-content h1, h1#_top { font-weight: 700; letter-spacing: -.02em; }
+.sl-markdown-content h2 { font-weight: 600; letter-spacing: -.01em; }
+.sl-markdown-content .sl-heading-wrapper.level-h2 { border-bottom: 1px solid var(--sl-color-hairline); padding-bottom: .35rem; }
+.sl-markdown-content h3 { font-weight: 600; }
+.sl-markdown-content table { font-size: .9rem; }
+.sl-markdown-content th { background: var(--sl-color-gray-6); font-weight: 600; }
+.sl-markdown-content code:not(pre code) { border-radius: .3rem; padding: .1em .35em; }
+.sl-markdown-content pre.mermaid, .sl-markdown-content .mermaid {
+  border: 1px solid var(--sl-color-hairline); border-radius: .6rem; padding: 1rem; background: var(--sl-color-gray-7);
+}
+:root:not([data-theme='light']) .sl-markdown-content .mermaid { background: #16181b; }
+
+/* the "On this page" column */
+.right-sidebar { border-inline-start: 1px solid var(--sl-color-hairline); }
+/* no guide lines next to top-level items; nested groups keep theirs */
+.sidebar-content ul.top-level > li > details > ul > li { border-inline-start: 0 !important; padding-inline-start: 0 !important; margin-inline-start: 0 !important; }
