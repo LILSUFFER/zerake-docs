@@ -32,7 +32,7 @@ SPECS2["architecture"] = {
         N("queue", "Сервер Zerake", 6, "Очередь выдачи\nфишек"),
         N("agent", "Внешние системы", 6, "Агент → ClubGG:\nвыдача фишек", "end"),
     ],
-    "edges": [("s", "ui"), ("ui", "api"), ("cron", "api"), ("api", "chain"), ("api", "db"), ("db", "log"),
+    "edges": [("s", "ui"), ("ui", "api", None, "bottom"), ("cron", "api"), ("api", "chain"), ("api", "db"), ("db", "log"),
               ("log", "note"), ("note", "bots"), ("note", "queue"), ("queue", "agent")],
 }
 

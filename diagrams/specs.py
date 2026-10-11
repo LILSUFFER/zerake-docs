@@ -45,7 +45,7 @@ SPECS["deposit-personal"] = {
         N("chips", "Zerake", 7, "Выдача фишек\nна GG ID"),
         N("e", "Игрок", 7, "Фишки на GG ID", "end"),
     ],
-    "edges": [("s", "open"), ("open", "addr"), ("addr", "pay", None, "bottom"), ("pay", "fin"), ("fin", "scan", None, "bottom"), ("scan", "rate"),
+    "edges": [("s", "open"), ("open", "addr"), ("addr", "pay", None, "down"), ("pay", "fin"), ("fin", "scan", None, "bottom"), ("scan", "rate"),
               ("rate", "min"), ("min", "dep", "Да"), ("min", "low", "Нет"), ("dep", "chips"), ("chips", "e")],
 }
 
@@ -97,13 +97,13 @@ SPECS["support"] = {
         N("s", "Игрок", 0, "Начало", "start"),
         N("q", "Игрок", 1, "Вопрос, фото\nили файл"),
         N("who", "Бот поддержки", 1, "Найти GG ID\nигрока"),
-        N("fw", "Бот команды", 1, "💬 Сообщение\nвсей команде"),
+        N("fw", "Бот команды", 1, "Сообщение\nвсей команде"),
         N("rep", "Менеджер", 1, "Ответить\n(Reply)"),
         N("map", "Бот команды", 2, "Найти, чей\nэто вопрос"),
         N("send", "Бот поддержки", 2, "Отправить\nответ игроку"),
         N("e", "Игрок", 2, "Ответ\nполучен", "end"),
     ],
-    "edges": [("s", "q"), ("q", "who"), ("who", "fw"), ("fw", "rep"), ("rep", "map"), ("map", "send"), ("send", "e")],
+    "edges": [("s", "q"), ("q", "who"), ("who", "fw"), ("fw", "rep"), ("rep", "map", None, "bottom"), ("map", "send"), ("send", "e")],
 }
 
 SPECS["agent"] = {
