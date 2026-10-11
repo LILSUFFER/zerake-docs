@@ -191,4 +191,4 @@ starlight-tabs [role='tab'][aria-selected='true'] { color: var(--sl-color-white)
 .zk-diagram img[src*="/diagrams/"] { max-width: 100%; }
 
 /* a diagram always fits the window height on any screen; full size in the full-screen view */
-.zk-diagram img[src*="/diagrams/"] { max-height: calc(100vh - 150px); width: auto; }
+

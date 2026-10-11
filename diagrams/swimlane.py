@@ -3,10 +3,10 @@
 # Usage: python diagrams/swimlane.py   (writes public/diagrams/*.svg from SPECS in diagrams/specs.py)
 import html, os, sys
 
-LANE_W, HEAD_H, ROW_H, TOP = 190, 40, 84, 8
-STEP_W, STEP_H = 162, 46
-DEC_W, DEC_H = 176, 64
-PILL_W, PILL_H = 154, 38
+LANE_W, HEAD_H, ROW_H, TOP = 190, 38, 72, 6
+STEP_W, STEP_H = 162, 42
+DEC_W, DEC_H = 166, 56
+PILL_W, PILL_H = 154, 34
 FONT = "Segoe UI, -apple-system, Roboto, Helvetica, Arial, sans-serif"
 C = {
     "lane_bg": "#ffffff", "lane_line": "#94a3b8", "head_bg": "#f1f4f9", "head_text": "#1e293b",
@@ -76,16 +76,13 @@ def edge_svg(pts, label=None):
     d = "M" + " L".join(f"{x:.1f},{y:.1f}" for x, y in pts)
     s = f'<path d="{d}" fill="none" stroke="{C["edge"]}" stroke-width="1.6" marker-end="url(#arr)"/>'
     if label:
+        # plain text next to the line, no box: above a horizontal segment, to the right of a vertical one
         (x1, y1), (x2, y2) = pts[0], pts[1]
-        w = 9 * len(label) + 14
         if abs(x2 - x1) > abs(y2 - y1):
-            if abs(x2 - x1) < w + 40: lx, ly = (x1 + x2) / 2, y1 - 14      # short segment: label above the line
-            else: lx, ly = x1 + (x2 - x1) * 0.42, y1
+            lx, ly, anchor = (x1 + x2) / 2, y1 - 9, "middle"
         else:
-            if abs(y2 - y1) < 50: lx, ly = x1 + w / 2 + 8, (y1 + y2) / 2    # short segment: label beside the line
-            else: lx, ly = x1, y1 + (y2 - y1) * 0.45
-        s += (f'<rect x="{lx - w / 2:.1f}" y="{ly - 11:.1f}" width="{w}" height="22" rx="4" fill="#ffffff"/>'
-              f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="500" fill="{C["edge_label"]}">{esc(label)}</text>')
+            lx, ly, anchor = x1 + 7, (y1 + y2) / 2, "start"
+        s += f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" dominant-baseline="central" font-size="12.5" font-weight="600" fill="{C["edge_label"]}">{esc(label)}</text>'
     return s
 
 
