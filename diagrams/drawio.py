@@ -25,10 +25,10 @@ STYLE = {
 }
 COMMON = f"fontFamily={FONT};fontSize=12;strokeWidth=1.4;"
 EDGE = (f"edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=10;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#1F2937;strokeWidth=1.6;"
-        f"endArrow=block;endFill=1;endSize=7;fontFamily={FONT};fontSize=12;fontStyle=1;fontColor=#334155;labelBackgroundColor=#FFFFFF;")
+        f"endArrow=block;endFill=1;endSize=7;fontFamily={FONT};fontSize=12;fontStyle=1;fontColor=#334155;labelBackgroundColor=none;")
 
 
-HEAD_W, COL_W, BLOCK_W, MAXC, BAND_GAP, PAD = 118, 154, 120, 12, 36, 26   # lanes are rows; the flow goes left to right
+HEAD_W, COL_W, BLOCK_W, MAXC, BAND_GAP, PAD = 118, 160, 118, 12, 36, 26   # lanes are rows; the flow goes left to right
 LANE_ROW = "rounded=0;html=0;fillColor=#FFFFFF;strokeColor=#94A3B8;strokeWidth=1.2;"
 LANE_HEAD = (f"rounded=0;html=0;fillColor=#F1F4F9;strokeColor=#94A3B8;strokeWidth=1.2;"
              f"fontColor=#1E293B;fontStyle=1;fontSize=12;fontFamily={FONT};align=center;verticalAlign=middle;")
@@ -61,7 +61,7 @@ def build(name, spec):
 
     def size(n):                                  # the same block size everywhere; a check is a diamond
         k = n.get("kind", "step"); lines = text(n).count(chr(10)) + 1
-        if k == "dec": return BLOCK_W + 12, 70
+        if k == "dec": return BLOCK_W + 6, 70
         return BLOCK_W, max(56, 14 + 15 * lines)
 
     def note_h(n): return (wrap(n["note"], 24).count(chr(10)) + 1) * 14 + 6 if n.get("note") else 0
@@ -100,9 +100,11 @@ def build(name, spec):
         cells.append(f'<mxCell id="n_{n["id"]}" value="{label}" style="{STYLE[k]}{COMMON}" vertex="1" parent="1">'
                      f'<mxGeometry x="{x:.0f}" y="{y:.0f}" width="{w}" height="{h}" as="geometry"/></mxCell>')
 
-    def edge(i, a, b, lab, st):
-        cells.append(f'<mxCell id="edge{i}" value="{html.escape(lab)}" style="{st}" edge="1" parent="1" source="{a}" target="{b}">'
-                     f'<mxGeometry relative="1" as="geometry"/></mxCell>')
+    def edge(i, a, b, lab, st, vertical=False):
+        # the label sits beside the line, not on it: above a horizontal line, right of a vertical one, near the start
+        geo = (f'<mxGeometry x="-0.55" y="{14 if vertical else 11}" relative="1" as="geometry"><mxPoint as="offset"/></mxGeometry>'
+               if lab else '<mxGeometry relative="1" as="geometry"/>')
+        cells.append(f'<mxCell id="edge{i}" value="{html.escape(lab)}" style="{st}" edge="1" parent="1" source="{a}" target="{b}">{geo}</mxCell>')
     jumps = 0
     for i, e in enumerate(spec["edges"]):
         a, b = e[0], e[1]; lab = e[2] if len(e) > 2 and e[2] else ""; side = TURN.get(e[3]) if len(e) > 3 and e[3] else None
@@ -114,7 +116,7 @@ def build(name, spec):
         if side in ("top", "bottom"):                # up/down, then sideways into the target's left side
             st += "entryX=0;entryY=0.5;"
         if ab == bb:
-            edge(i, "n_" + a, "n_" + b, lab, st); continue
+            edge(i, "n_" + a, "n_" + b, lab, st, vertical=(ax == bx)); continue
         # the flow continues on the next strip: a numbered connector at the end of this one and at the start of the next
         jumps += 1; tag = chr(64 + jumps)
         ox = HEAD_W + PAD + band_cols[ab] * COL_W + 6; oy = ay + ah / 2 - 11

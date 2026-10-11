@@ -3,7 +3,7 @@ title: "Персональные адреса: TON и GRAM"
 description: Как работает пополнение на адрес клуба, закреплённый за игроком.
 ---
 
-![Пополнение на персональный адрес](/diagrams/deposit-personal.svg?v=d62c3fbd)
+![Пополнение на персональный адрес](/diagrams/deposit-personal.svg?v=adf4ee5c)
 
 ## Как устроено
 
