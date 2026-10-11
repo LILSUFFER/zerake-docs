@@ -23,15 +23,15 @@ STYLE = {
     "fail": OVAL + "fillColor=#FFE4E6;strokeColor=#E0565F;fontColor=#7A1F2B;",       # refusal / exception
     "skip": OVAL + "fillColor=#F1F5F9;strokeColor=#94A3B8;fontColor=#334155;",       # ignored
 }
-COMMON = f"fontFamily={FONT};fontSize=13;strokeWidth=1.5;"
+COMMON = f"fontFamily={FONT};fontSize=12;strokeWidth=1.4;"
 EDGE = (f"edgeStyle=orthogonalEdgeStyle;rounded=1;arcSize=10;orthogonalLoop=1;jettySize=auto;html=0;strokeColor=#1F2937;strokeWidth=1.6;"
         f"endArrow=block;endFill=1;endSize=7;fontFamily={FONT};fontSize=12;fontStyle=1;fontColor=#334155;labelBackgroundColor=#FFFFFF;")
 
 
-HEAD_W, COL_W, BLOCK_W, MAXC, BAND_GAP, PAD = 130, 160, 134, 7, 36, 34   # lanes are rows; the flow goes left to right
+HEAD_W, COL_W, BLOCK_W, MAXC, BAND_GAP, PAD = 118, 154, 120, 12, 36, 26   # lanes are rows; the flow goes left to right
 LANE_ROW = "rounded=0;html=0;fillColor=#FFFFFF;strokeColor=#94A3B8;strokeWidth=1.2;"
 LANE_HEAD = (f"rounded=0;html=0;fillColor=#F1F4F9;strokeColor=#94A3B8;strokeWidth=1.2;"
-             f"fontColor=#1E293B;fontStyle=1;fontSize=13;fontFamily={FONT};align=center;verticalAlign=middle;")
+             f"fontColor=#1E293B;fontStyle=1;fontSize=12;fontFamily={FONT};align=center;verticalAlign=middle;")
 OFFPAGE = f"ellipse;html=0;fillColor=#1F2937;strokeColor=#1F2937;fontColor=#FFFFFF;fontStyle=1;fontSize=11;fontFamily={FONT};"
 # exit sides are written in the specs for a top-down flow; here the flow is left-to-right, so they turn by 90°
 TURN = {"bottom": "right", "top": "left", "left": "top", "right": "bottom", "down": "down"}
@@ -42,8 +42,16 @@ SIDE = {"right": "exitX=1;exitY=0.5;", "left": "exitX=0;exitY=0.5;", "bottom": "
 def build(name, spec):
     lanes = spec["lanes"]; nodes = spec["nodes"]; wide = spec.get("wide", {})
 
+    def wrap(s, limit):
+        lines, cur = [], ""
+        for w in s.replace(chr(10), " ").split():
+            if cur and len(cur) + 1 + len(w) > limit: lines.append(cur); cur = w
+            else: cur = (cur + " " + w).strip()
+        if cur: lines.append(cur)
+        return chr(10).join(lines)
+
     def text(n):                                  # re-wrap the words to the block width
-        k = n.get("kind", "step"); limit = 15 if k in ("dec", "start", "end", "fail", "skip", "status") else 18
+        k = n.get("kind", "step"); limit = 13 if k == "dec" else 14 if k in ("start", "end", "fail", "skip", "status") else 16
         words = n["text"].replace(chr(10), " ").split(); lines, cur = [], ""
         for w in words:
             if cur and len(cur) + 1 + len(w) > limit: lines.append(cur); cur = w
@@ -51,16 +59,18 @@ def build(name, spec):
         if cur: lines.append(cur)
         return chr(10).join(lines)
 
-    def size(n):                                  # the block grows with its text: one action per block
+    def size(n):                                  # the same block size everywhere; a check is a diamond
         k = n.get("kind", "step"); lines = text(n).count(chr(10)) + 1
-        if k == "dec": return BLOCK_W + 16, 28 + 20 * lines
-        return BLOCK_W, 18 + 17 * lines
+        if k == "dec": return BLOCK_W + 12, 70
+        return BLOCK_W, max(56, 14 + 15 * lines)
+
+    def note_h(n): return (wrap(n["note"], 24).count(chr(10)) + 1) * 14 + 6 if n.get("note") else 0
     cols = max(n["row"] for n in nodes) + 1
     bands = (cols + MAXC - 1) // MAXC             # a long process continues on a second strip below, like a page break
     per = (cols + bands - 1) // bands             # strips of about equal length
     band_cols = [min(per, cols - b * per) for b in range(bands)]
     maxc = per
-    sub_h = {l: max([size(n)[1] for n in nodes if n["lane"] == l] or [40]) + 26 for l in lanes}
+    sub_h = {l: max([size(n)[1] + note_h(n) for n in nodes if n["lane"] == l] or [40]) + 28 for l in lanes}
     lane_h = {l: sub_h[l] * wide.get(l, 1) for l in lanes}
     band_lanes = [[l for l in lanes if any(n["lane"] == l and n["row"] // per == b for n in nodes)] for b in range(bands)]
     lane_y, band_y, band_h, y = [], [], [], 0
@@ -80,7 +90,11 @@ def build(name, spec):
     for n in nodes:
         k = n.get("kind", "step"); w, h = size(n); c = n["row"]; b = c // per
         x = HEAD_W + PAD + (c % per) * COL_W + (COL_W - w) / 2
-        y = lane_y[b][n["lane"]] + n.get("col", 0) * sub_h[n["lane"]] + (sub_h[n["lane"]] - h) / 2
+        y = lane_y[b][n["lane"]] + n.get("col", 0) * sub_h[n["lane"]] + (sub_h[n["lane"]] - h - note_h(n)) / 2
+        if n.get("note"):                        # what exactly is checked, in small grey text under the block
+            nt = html.escape(wrap(n["note"], 24)).replace(chr(10), "&#xa;")
+            cells.append(f'<mxCell id="note_{n["id"]}" value="{nt}" style="text;html=0;align=center;verticalAlign=top;fontFamily={FONT};fontSize=10.5;fontColor=#64748B;" vertex="1" parent="1">'
+                         f'<mxGeometry x="{x - 20:.0f}" y="{y + h + 2:.0f}" width="{w + 40}" height="{note_h(n)}" as="geometry"/></mxCell>')
         pos[n["id"]] = (x, y, w, h, b)
         label = html.escape(text(n)).replace("\n", "&#xa;")   # a real line break in the plain-text label
         cells.append(f'<mxCell id="n_{n["id"]}" value="{label}" style="{STYLE[k]}{COMMON}" vertex="1" parent="1">'
