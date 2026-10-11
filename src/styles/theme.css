@@ -1,0 +1,13 @@
+/* Zerake colours: the site's green as the accent; Starlight's own greys for light and dark */
+:root {
+  --sl-color-accent-low: #06281d;
+  --sl-color-accent: #19c58f;
+  --sl-color-accent-high: #b8f3df;
+  --sl-font: 'Geist', -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+:root[data-theme='light'] {
+  --sl-color-accent-low: #d4f7ea;
+  --sl-color-accent: #0f8a63;
+  --sl-color-accent-high: #064a35;
+}
+.site-title img { height: 1.6rem; width: auto; }
