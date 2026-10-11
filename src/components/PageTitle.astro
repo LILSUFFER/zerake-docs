@@ -1,0 +1,40 @@
+---
+// Page title like Cloudflare's docs: breadcrumbs above, "last updated" under it, a thin line below.
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+
+const route = Astro.locals.starlightRoute;
+type Entry = { type: string; label: string; isCurrent?: boolean; entries?: Entry[] };
+function trail(items: Entry[], path: string[] = []): string[] | null {
+	for (const it of items) {
+		if (it.type === 'link' && it.isCurrent) return path;
+		if (it.type === 'group' && it.entries) {
+			const r = trail(it.entries, [...path, it.label]);
+			if (r) return r;
+		}
+	}
+	return null;
+}
+const crumbs = (trail(route.sidebar as Entry[]) ?? []).slice(0, 2);
+const isHome = route.id === '' || route.id === 'index';
+const updated = route.lastUpdated;
+---
+
+{!isHome && (
+	<nav class="zk-crumbs" aria-label="Путь">
+		<a href="/">Документация</a>
+		{crumbs.map((c) => (<><span class="sep">/</span><span>{c}</span></>))}
+	</nav>
+)}
+<Default />
+<div class="zk-meta">
+	{updated && <span>Обновлено {updated.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}</span>}
+</div>
+
+<style>
+	.zk-crumbs { display: flex; flex-wrap: wrap; gap: .4rem; font-size: .82rem; color: var(--sl-color-gray-3); margin-bottom: .9rem; }
+	.zk-crumbs a { color: var(--sl-color-gray-2); text-decoration: none; }
+	.zk-crumbs a:hover { color: var(--sl-color-accent); }
+	.zk-crumbs .sep { color: var(--sl-color-gray-4); }
+	.zk-meta { display: flex; gap: 1rem; font-size: .82rem; color: var(--sl-color-gray-3); margin-top: .6rem; padding-bottom: 1rem; border-bottom: 1px solid var(--sl-color-hairline); }
+	.zk-meta:empty { display: none; }
+</style>

@@ -1,0 +1,28 @@
+---
+// Logo with the DOCS tag, then the top links, like Cloudflare's docs header.
+import Default from '@astrojs/starlight/components/SiteTitle.astro';
+const links = [
+	{ label: 'Быстрый старт', href: '/start/quickstart/' },
+	{ label: 'Пополнение', href: '/top-up/how-it-works/' },
+	{ label: 'Снятие', href: '/cash-out/how-it-works/' },
+	{ label: 'Справочник', href: '/reference/networks/' },
+	{ label: 'Устройство', href: '/architecture/overview/' },
+];
+const path = Astro.url.pathname;
+const section = (href: string) => '/' + href.split('/')[1] + '/';
+---
+
+<div class="zk-brand">
+	<Default />
+	<nav class="zk-top" aria-label="Разделы">
+		{links.map((l) => <a href={l.href} aria-current={path.startsWith(section(l.href)) ? 'page' : undefined}>{l.label}</a>)}
+	</nav>
+</div>
+
+<style>
+	.zk-brand { display: flex; align-items: center; gap: 1.5rem; }
+	.zk-top { display: none; align-items: center; gap: 1.25rem; padding-inline-start: 1.5rem; border-inline-start: 1px solid var(--sl-color-hairline); height: 1.5rem; }
+	.zk-top a { font-size: .875rem; color: var(--sl-color-gray-2); text-decoration: none; white-space: nowrap; }
+	.zk-top a:hover, .zk-top a[aria-current='page'] { color: var(--sl-color-white); }
+	@media (min-width: 72rem) { .zk-top { display: flex; } }
+</style>

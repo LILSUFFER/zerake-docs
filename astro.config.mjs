@@ -16,6 +16,7 @@ export default defineConfig({
 			logo: { light: './src/assets/logo-light.svg', dark: './src/assets/logo-dark.svg', replacesTitle: true },
 			favicon: '/favicon.svg',
 			customCss: ['./src/styles/theme.css'],
+			components: { PageTitle: './src/components/PageTitle.astro', SiteTitle: './src/components/SiteTitle.astro' },
 			head: [
 				{ tag: 'link', attrs: { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap' } },
 				// light by default, like Cloudflare's docs; the switch in the header still works
