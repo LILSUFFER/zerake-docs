@@ -124,6 +124,16 @@ if __name__ == "__main__":
     from specs2 import SPECS2
     SPECS = {**SPECS, **SPECS2}
     dst = os.path.join(here, "..", "public", "diagrams"); os.makedirs(dst, exist_ok=True)
+    import glob, hashlib, re
+    versions = {}
     for name, spec in SPECS.items():
-        open(os.path.join(dst, name + ".svg"), "w", encoding="utf-8").write(render(spec))
+        svg = render(spec)
+        open(os.path.join(dst, name + ".svg"), "w", encoding="utf-8").write(svg)
+        versions[name] = hashlib.sha1(svg.encode("utf-8")).hexdigest()[:8]
         print("wrote", name)
+    # every page links its diagrams with ?v=<content hash>, so a browser never shows an old cached picture
+    docs = os.path.join(here, "..", "src", "content", "docs")
+    for f in glob.glob(os.path.join(docs, "**", "*.md*"), recursive=True):
+        t = open(f, encoding="utf-8").read()
+        n = re.sub(r"\(/diagrams/([\w-]+)\.svg(\?v=\w+)?\)", lambda m: f"(/diagrams/{m.group(1)}.svg?v={versions.get(m.group(1), 'x')})", t)
+        if n != t: open(f, "w", encoding="utf-8", newline="\n").write(n)
