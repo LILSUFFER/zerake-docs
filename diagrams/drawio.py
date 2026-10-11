@@ -13,14 +13,16 @@ SPECS = {**S1, **S2}
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 FONT = "Segoe UI"
 LANE_W, HEAD_H, ROW_H, PAD_TOP = 220, 42, 84, 14
-SIZE = {"step": (176, 50), "bad": (176, 50), "ok": (176, 50), "dec": (176, 74), "start": (150, 40), "end": (150, 40)}
+SIZE = {}
+OVAL = "rounded=1;arcSize=50;html=0;fontStyle=1;"
 STYLE = {
-    "step": "rounded=1;arcSize=12;html=0;fillColor=#EDE7FF;strokeColor=#8B5CF6;fontColor=#3B2A7A;",
-    "bad": "rounded=1;arcSize=12;html=0;fillColor=#FFF1F2;strokeColor=#E0565F;fontColor=#7A1F2B;",
-    "ok": "rounded=1;arcSize=12;html=0;fillColor=#12A477;strokeColor=#0F8A63;fontColor=#FFFFFF;fontStyle=1;",
-    "dec": "rhombus;html=0;fillColor=#FDE2E4;strokeColor=#E0565F;fontColor=#7A1F2B;",
-    "start": "rounded=1;arcSize=50;html=0;fillColor=#C7F2E4;strokeColor=#12A477;fontColor=#0B3D2C;fontStyle=1;",
-    "end": "rounded=1;arcSize=50;html=0;fillColor=#E3F6C8;strokeColor=#7CB342;fontColor=#2F4A12;fontStyle=1;",
+    "start": OVAL + "fillColor=#C7F2E4;strokeColor=#12A477;fontColor=#0B3D2C;",     # the event that starts it
+    "step": "rounded=1;arcSize=12;html=0;fillColor=#EDE7FF;strokeColor=#8B5CF6;fontColor=#3B2A7A;",   # an action
+    "dec": "rhombus;html=0;fillColor=#FFF7E0;strokeColor=#D99A00;fontColor=#5C4100;",  # a check
+    "status": "rounded=1;arcSize=12;html=0;fillColor=#12A477;strokeColor=#0F8A63;fontColor=#FFFFFF;fontStyle=1;",  # record status
+    "end": OVAL + "fillColor=#E3F6C8;strokeColor=#7CB342;fontColor=#2F4A12;",        # result
+    "fail": OVAL + "fillColor=#FFE4E6;strokeColor=#E0565F;fontColor=#7A1F2B;",       # refusal / exception
+    "skip": OVAL + "fillColor=#F1F5F9;strokeColor=#94A3B8;fontColor=#334155;",       # ignored
 }
 COMMON = f"fontFamily={FONT};fontSize=13;strokeWidth=1.5;"
 LANE = (f"swimlane;horizontal=1;startSize={HEAD_H};fillColor=#F1F4F9;swimlaneFillColor=#FFFFFF;strokeColor=#94A3B8;"
@@ -31,36 +33,58 @@ SIDE = {"right": "exitX=1;exitY=0.5;", "left": "exitX=0;exitY=0.5;", "bottom": "
 
 
 def build(name, spec):
-    lanes = spec["lanes"]; nodes = spec["nodes"]
+    lanes = spec["lanes"]; nodes = spec["nodes"]; wide = spec.get("wide", {})
     global LANE_W
-    LANE_W = 190 if len(lanes) <= 4 else 160          # 4 lanes = the 760 px text column; 5 lanes a little wider
+    cols = sum(wide.get(l, 1) for l in lanes)
+    LANE_W = 190 if cols <= 4 else 160          # 4 columns = the 760 px text column; 5 a little wider
     nw = LANE_W - 26
-    for k in ("step", "bad", "ok"): SIZE[k] = (nw, 50)
-    SIZE["dec"] = (LANE_W - 14, 62); SIZE["start"] = SIZE["end"] = (nw, 38)
-    lane_of = {n["id"]: lanes.index(n["lane"]) for n in nodes}
+    for k in ("step", "status"): SIZE[k] = (nw, 50)
+    SIZE["dec"] = (LANE_W - 14, 62)
+    for k in ("start", "end", "fail", "skip"): SIZE[k] = (nw, 42)
+    lane_x, x = {}, 0
+    for l in lanes: lane_x[l] = x; x += wide.get(l, 1) * LANE_W
     rows = max(n["row"] for n in nodes) + 1
     H = HEAD_H + PAD_TOP + ROW_H * rows + 10
     cells = ['<mxCell id="0"/>', '<mxCell id="1" parent="0"/>']
     for i, lane in enumerate(lanes):
         cells.append(f'<mxCell id="lane{i}" value="{html.escape(lane)}" style="{LANE}" vertex="1" parent="1">'
-                     f'<mxGeometry x="{i * LANE_W}" y="0" width="{LANE_W}" height="{H}" as="geometry"/></mxCell>')
-    pos = {}
+                     f'<mxGeometry x="{lane_x[lane]}" y="0" width="{wide.get(lane, 1) * LANE_W}" height="{H}" as="geometry"/></mxCell>')
+    cx = {}
     for n in nodes:
-        k = n.get("kind", "step"); w, h = SIZE[k]; li = lanes.index(n["lane"])
-        x = li * LANE_W + (LANE_W - w) / 2; y = HEAD_H + PAD_TOP + n["row"] * ROW_H + (ROW_H - h) / 2 - 10
-        pos[n["id"]] = (x, y, w, h)
+        k = n.get("kind", "step"); w, h = SIZE[k]
+        c = lane_x[n["lane"]] + n.get("col", 0) * LANE_W + LANE_W / 2; cx[n["id"]] = c
+        y = HEAD_H + PAD_TOP + n["row"] * ROW_H + (ROW_H - h) / 2 - 10
         label = html.escape(n["text"]).replace("\n", "&#xa;")   # a real line break in the plain-text label
         cells.append(f'<mxCell id="n_{n["id"]}" value="{label}" style="{STYLE[k]}{COMMON}" vertex="1" parent="1">'
-                     f'<mxGeometry x="{x:.0f}" y="{y:.0f}" width="{w}" height="{h}" as="geometry"/></mxCell>')
+                     f'<mxGeometry x="{c - w / 2:.0f}" y="{y:.0f}" width="{w}" height="{h}" as="geometry"/></mxCell>')
     for i, e in enumerate(spec["edges"]):
         a, b = e[0], e[1]; lab = e[2] if len(e) > 2 and e[2] else ""; side = e[3] if len(e) > 3 else None
         st = EDGE + (SIDE[side] if side else "")
-        if side == "bottom" and lane_of[a] != lane_of[b]:      # down, then sideways into the target's near side
-            st += "entryX=1;entryY=0.5;" if lane_of[b] < lane_of[a] else "entryX=0;entryY=0.5;"
+        if side == "bottom" and cx[a] != cx[b]:      # down, then sideways into the target's near side
+            st += "entryX=1;entryY=0.5;" if cx[b] < cx[a] else "entryX=0;entryY=0.5;"
+        if side in ("left", "right"):                # sideways, then down into the target's top
+            st += "entryX=0.5;entryY=0;"
         cells.append(f'<mxCell id="edge{i}" value="{html.escape(lab)}" style="{st}" edge="1" parent="1" source="n_{a}" target="n_{b}">'
                      f'<mxGeometry relative="1" as="geometry"/></mxCell>')
     model = f'<mxGraphModel grid="0" page="0"><root>{"".join(cells)}</root></mxGraphModel>'
     return f'<mxfile><diagram name="{html.escape(spec["title"])}">{model}</diagram></mxfile>', model
+
+
+LEGEND = [("start", "Начало", "событие, с которого\nвсё начинается"), ("step", "Действие", "делает участник\nэтой колонки"),
+          ("dec", "Проверка?", "Да — дальше вниз,\nНет — в сторону"), ("status", "DEP-… / WD-…", "заявка меняет\nстатус"),
+          ("end", "Итог", "чем закончилось"), ("fail", "Отказ", "проверка\nне пройдена"), ("skip", "Пропуск", "не учитывается")]
+
+def legend():
+    """One row of shapes with their meaning under each: the notation every diagram uses."""
+    W, cells = 108, ['<mxCell id="0"/>', '<mxCell id="1" parent="0"/>']
+    for i, (k, t, d) in enumerate(LEGEND):
+        w, h = (96, 56) if k == "dec" else (96, 38)
+        x = i * W + (W - w) / 2
+        cells.append(f'<mxCell id="l{i}" value="{html.escape(t)}" style="{STYLE[k]}fontFamily={FONT};fontSize=11;strokeWidth=1.5;" vertex="1" parent="1">'
+                     f'<mxGeometry x="{x:.0f}" y="{(56 - h) / 2:.0f}" width="{w}" height="{h}" as="geometry"/></mxCell>')
+        cells.append(f'<mxCell id="d{i}" value="{html.escape(d).replace(chr(10), "&#xa;")}" style="text;html=0;align=center;verticalAlign=top;'
+                     f'fontFamily={FONT};fontSize=11;fontColor=#475569;" vertex="1" parent="1"><mxGeometry x="{i * W}" y="62" width="{W}" height="34" as="geometry"/></mxCell>')
+    return f'<mxGraphModel grid="0" page="0"><root>{"".join(cells)}</root></mxGraphModel>'
 
 
 def render_svg(model, out_svg, title):
@@ -106,6 +130,10 @@ if __name__ == "__main__":
     src = os.path.join(HERE, "drawio"); os.makedirs(src, exist_ok=True)
     dst = os.path.join(HERE, "..", "public", "diagrams"); os.makedirs(dst, exist_ok=True)
     versions = {}
+    if not sys.argv[1:] or "legend" in names:
+        names = [n for n in names if n != "legend"]
+        svg = render_svg(legend(), os.path.join(dst, "legend.svg"), "Обозначения на схемах")
+        versions["legend"] = hashlib.sha1(svg.encode("utf-8")).hexdigest()[:8]
     for n in names:
         f, model = build(n, SPECS[n])
         open(os.path.join(src, n + ".drawio"), "w", encoding="utf-8").write(f)
