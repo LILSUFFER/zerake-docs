@@ -41,6 +41,8 @@ SIDE = {"right": "exitX=1;exitY=0.5;", "left": "exitX=0;exitY=0.5;", "bottom": "
 
 def build(name, spec):
     lanes = spec["lanes"]; nodes = spec["nodes"]; wide = spec.get("wide", {})
+    global COL_W, BLOCK_W
+    COL_W = spec.get("col_w", 160); BLOCK_W = COL_W - 42
 
     def wrap(s, limit):
         lines, cur = [], ""
