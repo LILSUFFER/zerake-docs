@@ -5,7 +5,7 @@ description: Из каких частей состоит Zerake и как они
 
 ## Компоненты
 
-![Компоненты Zerake](/diagrams/architecture.svg?v=046f2741)
+![Компоненты Zerake](/diagrams/architecture.svg?v=dba80c9d)
 
 
 | Компонент | Задача |

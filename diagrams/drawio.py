@@ -36,24 +36,28 @@ def build(name, spec):
     lanes = spec["lanes"]; nodes = spec["nodes"]; wide = spec.get("wide", {})
     global LANE_W
     cols = sum(wide.get(l, 1) for l in lanes)
-    LANE_W = 190 if cols <= 4 else 160          # 4 columns = the 760 px text column; 5 a little wider
-    nw = LANE_W - 26
-    for k in ("step", "status"): SIZE[k] = (nw, 50)
-    SIZE["dec"] = (LANE_W - 14, 62)
-    for k in ("start", "end", "fail", "skip"): SIZE[k] = (nw, 42)
+    LANE_W = 176 if cols >= 5 else 200          # fits the 900 px text column
+    nw = LANE_W - 22
+
+    def size(n):                                  # the block grows with its text: one action per block, 1–3 lines
+        k = n.get("kind", "step"); lines = n["text"].count(chr(10)) + 1
+        if k == "dec": return LANE_W - 12, 34 + 24 * lines
+        return nw, 22 + 18 * lines
     lane_x, x = {}, 0
     for l in lanes: lane_x[l] = x; x += wide.get(l, 1) * LANE_W
     rows = max(n["row"] for n in nodes) + 1
-    H = HEAD_H + PAD_TOP + ROW_H * rows + 10
+    row_h = [max([size(n)[1] for n in nodes if n["row"] == r] or [40]) + 30 for r in range(rows)]
+    row_y = [HEAD_H + PAD_TOP + sum(row_h[:r]) for r in range(rows)]
+    H = HEAD_H + PAD_TOP + sum(row_h) + 6
     cells = ['<mxCell id="0"/>', '<mxCell id="1" parent="0"/>']
     for i, lane in enumerate(lanes):
         cells.append(f'<mxCell id="lane{i}" value="{html.escape(lane)}" style="{LANE}" vertex="1" parent="1">'
                      f'<mxGeometry x="{lane_x[lane]}" y="0" width="{wide.get(lane, 1) * LANE_W}" height="{H}" as="geometry"/></mxCell>')
     cx = {}
     for n in nodes:
-        k = n.get("kind", "step"); w, h = SIZE[k]
+        k = n.get("kind", "step"); w, h = size(n)
         c = lane_x[n["lane"]] + n.get("col", 0) * LANE_W + LANE_W / 2; cx[n["id"]] = c
-        y = HEAD_H + PAD_TOP + n["row"] * ROW_H + (ROW_H - h) / 2 - 10
+        y = row_y[n["row"]] + (row_h[n["row"]] - h) / 2
         label = html.escape(n["text"]).replace("\n", "&#xa;")   # a real line break in the plain-text label
         cells.append(f'<mxCell id="n_{n["id"]}" value="{label}" style="{STYLE[k]}{COMMON}" vertex="1" parent="1">'
                      f'<mxGeometry x="{c - w / 2:.0f}" y="{y:.0f}" width="{w}" height="{h}" as="geometry"/></mxCell>')
